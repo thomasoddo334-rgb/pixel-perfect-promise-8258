@@ -347,10 +347,9 @@ async function pullVehicles() {
       const remote = fromRow(row as Record<string, unknown>);
       const local = vehicles.get(remote.id);
       const remoteNewer = !local || Date.parse(remote.updated_at) > Date.parse(local.updated_at);
-      if (!local || (local._dirty === 0 && local.updated_at !== remote.updated_at) || (local._dirty === 1 && remoteNewer)) {
-        if (local && local._dirty === 0 && !remoteNewer && Date.parse(remote.updated_at) === Date.parse(local.updated_at)) {
-          continue;
-        }
+      const sameVersion = !!local && Date.parse(remote.updated_at) === Date.parse(local.updated_at);
+      const take = !local || (local._dirty === 1 ? remoteNewer : !sameVersion || local.deleted !== remote.deleted);
+      if (take) {
         vehicles.set(remote.id, remote);
         await db.put("vehicles", remote);
       }
