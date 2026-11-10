@@ -47,6 +47,7 @@ export type Database = {
           publication: string | null
           reference: string
           remarque: string
+          server_updated_at: string
           updated_at: string
           updated_by: string | null
           updated_by_name: string | null
@@ -72,6 +73,7 @@ export type Database = {
           publication?: string | null
           reference: string
           remarque?: string
+          server_updated_at?: string
           updated_at?: string
           updated_by?: string | null
           updated_by_name?: string | null
@@ -97,6 +99,7 @@ export type Database = {
           publication?: string | null
           reference?: string
           remarque?: string
+          server_updated_at?: string
           updated_at?: string
           updated_by?: string | null
           updated_by_name?: string | null
