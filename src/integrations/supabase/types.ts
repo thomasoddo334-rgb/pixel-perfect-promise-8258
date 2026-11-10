@@ -14,13 +14,102 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      allowed_emails: {
+        Row: {
+          email: string
+        }
+        Insert: {
+          email: string
+        }
+        Update: {
+          email?: string
+        }
+        Relationships: []
+      }
+      vehicles: {
+        Row: {
+          annee: number | null
+          boite: string | null
+          carburant: string | null
+          couchages: number | null
+          created_at: string
+          deleted: boolean
+          disponibilite: string
+          equipements: string[]
+          id: string
+          kilometrage: number | null
+          marque: string
+          modele: string
+          motorisation: string
+          photos: Json
+          places: number | null
+          prix: number | null
+          publication: string | null
+          reference: string
+          remarque: string
+          updated_at: string
+          updated_by: string | null
+          updated_by_name: string | null
+          wof: boolean
+        }
+        Insert: {
+          annee?: number | null
+          boite?: string | null
+          carburant?: string | null
+          couchages?: number | null
+          created_at?: string
+          deleted?: boolean
+          disponibilite?: string
+          equipements?: string[]
+          id: string
+          kilometrage?: number | null
+          marque?: string
+          modele?: string
+          motorisation?: string
+          photos?: Json
+          places?: number | null
+          prix?: number | null
+          publication?: string | null
+          reference: string
+          remarque?: string
+          updated_at?: string
+          updated_by?: string | null
+          updated_by_name?: string | null
+          wof?: boolean
+        }
+        Update: {
+          annee?: number | null
+          boite?: string | null
+          carburant?: string | null
+          couchages?: number | null
+          created_at?: string
+          deleted?: boolean
+          disponibilite?: string
+          equipements?: string[]
+          id?: string
+          kilometrage?: number | null
+          marque?: string
+          modele?: string
+          motorisation?: string
+          photos?: Json
+          places?: number | null
+          prix?: number | null
+          publication?: string | null
+          reference?: string
+          remarque?: string
+          updated_at?: string
+          updated_by?: string | null
+          updated_by_name?: string | null
+          wof?: boolean
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_allowed_user: { Args: never; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
