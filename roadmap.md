@@ -1,5 +1,5 @@
 # Roadmap
-- [ ] Current request: replace WOF label and add 10 optional photo slots (20 total), verify tests and sheet.
+- [x] Current request: replace WOF label and add 10 optional photo slots (20 total), verify tests and sheet.
 - [ ] Backend: vehicles table, allowlist (2 Google accounts), photos storage
 - [ ] Google sign-in + access check
 - [ ] Offline store + sync queue + status indicator
