@@ -27,7 +27,7 @@ export function VanCard({ v }: { v: Vehicle }) {
       className="flex gap-3 rounded-2xl bg-card p-3 shadow-card transition-transform active:scale-[0.99]"
     >
       <div className="relative h-[84px] w-[104px] shrink-0 overflow-hidden rounded-xl bg-muted">
-        {first.id ? (
+        {first?.id ? (
           <PhotoImage vehicleId={v.id} photoId={first.id} alt={title} />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-muted-foreground">

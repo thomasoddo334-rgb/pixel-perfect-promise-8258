@@ -32,6 +32,8 @@ export const EQUIPEMENTS = [
   { key: "panneaux_solaires", label: "Panneaux solaires" },
 ] as const;
 export const REMARQUE_MAX = 400;
+export const WOF_LABEL = "wof and rego avalaible for one year";
+export const REQUIRED_PHOTO_COUNT = 10;
 
 export const PHOTO_SLOTS = [
   { label: "Avant", slug: "avant" },
@@ -44,6 +46,16 @@ export const PHOTO_SLOTS = [
   { label: "Salle d'eau", slug: "salle-d-eau" },
   { label: "Rangements", slug: "rangements" },
   { label: "Détail", slug: "detail" },
+  { label: "Supplémentaire 1", slug: "supplementaire-1" },
+  { label: "Supplémentaire 2", slug: "supplementaire-2" },
+  { label: "Supplémentaire 3", slug: "supplementaire-3" },
+  { label: "Supplémentaire 4", slug: "supplementaire-4" },
+  { label: "Supplémentaire 5", slug: "supplementaire-5" },
+  { label: "Supplémentaire 6", slug: "supplementaire-6" },
+  { label: "Supplémentaire 7", slug: "supplementaire-7" },
+  { label: "Supplémentaire 8", slug: "supplementaire-8" },
+  { label: "Supplémentaire 9", slug: "supplementaire-9" },
+  { label: "Supplémentaire 10", slug: "supplementaire-10" },
 ] as const;
 export const PHOTO_COUNT = PHOTO_SLOTS.length;
 
@@ -142,13 +154,15 @@ export function computeProgress(v: Vehicle): Progress {
   const photos = normalizePhotos(v.photos);
   const missingFields = REQUIRED_FIELDS.filter((f) => !isFilled(v[f.key])).map((f) => f.label);
   const missingPhotos = photos
-    .map((p, i) => (p.id || p.na ? null : `${i + 1} ${PHOTO_SLOTS[i].label}`))
+    .slice(0, REQUIRED_PHOTO_COUNT)
+    .map((p, i) => (p.id || p.na ? null : `${i + 1} ${PHOTO_SLOTS[i]?.label ?? "Photo"}`))
     .filter((x): x is string => x !== null);
   const photosWithImage = photos.filter((p) => p.id).length;
-  const photosDone = PHOTO_COUNT - missingPhotos.length;
+  const photosDone = photos.filter((p) => p.id || p.na).length;
+  const requiredPhotosDone = REQUIRED_PHOTO_COUNT - missingPhotos.length;
   const fieldsDone = REQUIRED_FIELDS.length - missingFields.length;
-  const total = REQUIRED_FIELDS.length + PHOTO_COUNT;
-  const percent = Math.round(((fieldsDone + photosDone) / total) * 100);
+  const total = REQUIRED_FIELDS.length + REQUIRED_PHOTO_COUNT;
+  const percent = Math.round(((fieldsDone + requiredPhotosDone) / total) * 100);
   const isComplete = missingFields.length === 0 && missingPhotos.length === 0;
 
   const anythingEntered =
@@ -224,8 +238,10 @@ export function formatNumber(n: number | null | undefined): string {
 }
 
 export function photoFileName(reference: string, slotIndex: number): string {
+  const slot = PHOTO_SLOTS[slotIndex];
+  if (!slot) throw new RangeError("Unknown photo slot");
   const nn = String(slotIndex + 1).padStart(2, "0");
-  return `${reference}_${nn}_${PHOTO_SLOTS[slotIndex].slug}.jpg`;
+  return `${reference}_${nn}_${slot.slug}.jpg`;
 }
 
 export function photoStoragePath(vehicleId: string, photoId: string): string {

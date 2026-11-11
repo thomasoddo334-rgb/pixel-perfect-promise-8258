@@ -74,6 +74,7 @@ export function PhotoGrid({ v }: { v: Vehicle }) {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {PHOTO_SLOTS.map((slot, i) => {
           const p = photos[i];
+          if (!p) return null;
           const isBusy = busy.has(i);
           return (
             <div key={slot.slug} className="flex flex-col gap-1.5">

@@ -23,13 +23,19 @@ export function ExportsScreen() {
   );
 
   function exportCsv() {
-    if (!selected.length) return toast.error("Aucun véhicule à exporter.");
+    if (!selected.length) {
+      toast.error("Aucun véhicule à exporter.");
+      return;
+    }
     const csv = buildWixCsv(selected);
     downloadBlob(`vans-wix-${todayStamp()}.csv`, new Blob([csv], { type: "text/csv;charset=utf-8" }));
   }
 
   async function exportZip() {
-    if (!selected.length) return toast.error("Aucun véhicule à exporter.");
+    if (!selected.length) {
+      toast.error("Aucun véhicule à exporter.");
+      return;
+    }
     setZipProgress("Préparation…");
     try {
       const { blob, count, missing } = await buildPhotosZip(selected, (d, t) => setZipProgress(`${d}/${t} photos`));

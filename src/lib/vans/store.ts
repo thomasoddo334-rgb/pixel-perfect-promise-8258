@@ -230,7 +230,8 @@ export function setPhotoNotConcerned(vehicleId: string, slot: number, na: boolea
   const cur = vehicles.get(vehicleId);
   if (!cur) return;
   const photos = normalizePhotos(cur.photos);
-  if (photos[slot].id && na) return;
+  const photo = photos[slot];
+  if (!photo || (photo.id && na)) return;
   photos[slot] = { id: null, na };
   updateVehicle(vehicleId, { photos });
 }

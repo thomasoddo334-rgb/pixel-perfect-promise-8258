@@ -25,7 +25,7 @@ export async function collectPhotoFiles(v: Vehicle): Promise<{ files: File[]; mi
   let missing = 0;
   const photos = normalizePhotos(v.photos);
   for (let i = 0; i < photos.length; i++) {
-    const id = photos[i].id;
+    const id = photos[i]?.id;
     if (!id) continue;
     const blob = await getPhotoBlob(v.id, id);
     if (!blob) {
@@ -50,7 +50,7 @@ export async function buildPhotosZip(
     const folder: Record<string, [Uint8Array, { level: 0 }]> = {};
     const photos = normalizePhotos(v.photos);
     for (let i = 0; i < photos.length; i++) {
-      const id = photos[i].id;
+      const id = photos[i]?.id;
       if (!id) continue;
       const blob = await getPhotoBlob(v.id, id);
       done++;
