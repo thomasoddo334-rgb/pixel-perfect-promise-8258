@@ -23,7 +23,9 @@ import {
   EQUIPEMENTS,
   MARQUES,
   PLACES,
+  PHOTO_COUNT,
   REMARQUE_MAX,
+  WOF_LABEL,
   computeProgress,
   formatNumber,
   type Vehicle,
@@ -324,7 +326,7 @@ function VehicleForm({ v }: { v: Vehicle }) {
             ))}
           </div>
           <ToggleChip active={v.wof} onClick={() => set({ wof: !v.wof })}>
-            WOF en cours de validité
+            {WOF_LABEL}
           </ToggleChip>
         </Section>
 
@@ -357,7 +359,7 @@ function VehicleForm({ v }: { v: Vehicle }) {
           title="Photos"
           aside={
             <span className="text-sm font-bold tabular-nums text-muted-foreground">
-              {progress.photosDone}/10
+              {progress.photosDone}/{PHOTO_COUNT}
             </span>
           }
         >

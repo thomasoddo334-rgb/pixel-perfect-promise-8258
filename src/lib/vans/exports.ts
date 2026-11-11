@@ -3,6 +3,7 @@ import {
   EQUIPEMENTS,
   PHOTO_COUNT,
   STATUS_LABEL,
+  WOF_LABEL,
   computeProgress,
   formatNumber,
   normalizePhotos,
@@ -107,7 +108,7 @@ export function buildSocialPost(v: Vehicle): string {
     .join(" · ");
   if (cap) lines.push(`👥 ${cap}`);
   if (equipements.length) lines.push(`✅ Équipements : ${equipements.join(", ")}`);
-  if (v.wof) lines.push("🔧 WOF en cours de validité");
+  if (v.wof) lines.push(`🔧 ${WOF_LABEL}`);
   if (v.prix !== null) lines.push(`💰 Prix : ${formatNumber(v.prix)} $ NZD`);
   if (v.remarque.trim()) {
     lines.push("");
