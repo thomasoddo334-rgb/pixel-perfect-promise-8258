@@ -18,8 +18,8 @@ const ALLOWED_KEY = (userId: string) => `fiches-vans:allowed:${userId}`;
 
 function nameOf(session: Session | null): string {
   const meta = (session?.user.user_metadata ?? {}) as Record<string, unknown>;
-  const full = (meta.full_name ?? meta.name) as string | undefined;
-  if (full) return full.split(" ")[0];
+  const full = (meta['full_name'] ?? meta['name']) as string | undefined;
+  if (full) return full.split(" ")[0] ?? "";
   return session?.user.email?.split("@")[0] ?? "";
 }
 

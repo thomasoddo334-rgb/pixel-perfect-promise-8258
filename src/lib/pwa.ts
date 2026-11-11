@@ -3,7 +3,7 @@ const SW_URL = "/sw.js";
 
 function isPreviewHost(host: string): boolean {
   const onLovable = /\.(lovable\.app|gpt-eng\.com|gptengineer\.run)$/.test(host);
-  const firstLabel = host.split(".")[0];
+  const firstLabel = host.split(".")[0] ?? "";
   if (onLovable && /^(?:id-preview|preview)(?:-[a-z0-9]+)?--.+$/.test(firstLabel)) return true;
   if (onLovable && /^project--[a-z0-9-]+-dev$/.test(firstLabel)) return true;
   if (host === "lovableproject.com" || host.endsWith(".lovableproject.com")) return true;

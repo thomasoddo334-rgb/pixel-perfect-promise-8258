@@ -155,7 +155,7 @@ export function computeProgress(v: Vehicle): Progress {
   const missingFields = REQUIRED_FIELDS.filter((f) => !isFilled(v[f.key])).map((f) => f.label);
   const missingPhotos = photos
     .slice(0, REQUIRED_PHOTO_COUNT)
-    .map((p, i) => (p.id || p.na ? null : `${i + 1} ${PHOTO_SLOTS[i].label}`))
+    .map((p, i) => (p.id || p.na ? null : `${i + 1} ${PHOTO_SLOTS[i]?.label ?? "Photo"}`))
     .filter((x): x is string => x !== null);
   const photosWithImage = photos.filter((p) => p.id).length;
   const photosDone = photos.filter((p) => p.id || p.na).length;
@@ -238,8 +238,10 @@ export function formatNumber(n: number | null | undefined): string {
 }
 
 export function photoFileName(reference: string, slotIndex: number): string {
+  const slot = PHOTO_SLOTS[slotIndex];
+  if (!slot) throw new RangeError("Unknown photo slot");
   const nn = String(slotIndex + 1).padStart(2, "0");
-  return `${reference}_${nn}_${PHOTO_SLOTS[slotIndex].slug}.jpg`;
+  return `${reference}_${nn}_${slot.slug}.jpg`;
 }
 
 export function photoStoragePath(vehicleId: string, photoId: string): string {

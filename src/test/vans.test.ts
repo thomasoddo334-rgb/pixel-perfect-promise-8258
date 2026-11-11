@@ -59,7 +59,7 @@ describe("references and files", () => {
     expect(base().photos).toHaveLength(20);
     const photos = normalizePhotos(complete().photos);
     expect(photos).toHaveLength(20);
-    expect(photos[0].id).toBe("p0");
+    expect(photos[0]?.id).toBe("p0");
     expect(photos[19]).toEqual({ id: null, na: false });
     expect(photoFileName("VAN-A24H", 19)).toBe("VAN-A24H_20_supplementaire-10.jpg");
   });
@@ -86,12 +86,12 @@ describe("Wix CSV", () => {
   it("starts with a UTF-8 BOM and the expected columns", () => {
     const csv = buildWixCsv([complete()]);
     expect(csv.charCodeAt(0)).toBe(0xfeff);
-    const header = csv.slice(1).split("\r\n")[0].split(",");
+    const header = (csv.slice(1).split("\r\n")[0] ?? "").split(",");
     expect(header).toEqual(CSV_COLUMNS);
     expect(header.slice(-21)).toEqual(["photo_principale", ...Array.from({ length: 20 }, (_, i) => `photo_${i + 1}`)]);
   });
   it("photo columns hold ZIP file names, empty for Pas concerné", () => {
-    const row = buildWixCsv([complete()]).slice(1).split("\r\n")[1].split(",");
+    const row = (buildWixCsv([complete()]).slice(1).split("\r\n")[1] ?? "").split(",");
     const idx = (c: string) => CSV_COLUMNS.indexOf(c);
     expect(row[idx("photo_principale")]).toBe("VAN-A24H_01_avant.jpg");
     expect(row[idx("photo_8")]).toBe("");
