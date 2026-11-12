@@ -42,7 +42,7 @@ async function loadPublic(id?: string): Promise<PublicVehicleView[]> {
     const { data: urls } = await sb.storage.from("van-photos").createSignedUrls(paths, PHOTO_URL_TTL);
     // Signed URLs are built from the server address; browsers must use the public one.
     const serverBase = process.env["SUPABASE_URL"]!.replace(/\/$/, "");
-    const browserBase = (process.env["VITE_SUPABASE_URL"] ?? import.meta.env.VITE_SUPABASE_URL ?? serverBase).replace(/\/$/, "");
+    const browserBase = (process.env["VITE_SUPABASE_URL"] ?? (import.meta.env["VITE_SUPABASE_URL"] as string | undefined) ?? serverBase).replace(/\/$/, "");
     for (const u of urls ?? []) {
       if (u.path && u.signedUrl) signed.set(u.path, u.signedUrl.replace(serverBase, browserBase));
     }
