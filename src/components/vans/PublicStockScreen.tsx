@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Search, Truck, X } from "lucide-react";
+import { Search, ShieldCheck, Truck, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { formatNumber } from "@/lib/vans/model";
 import { publicVehiclesQuery } from "@/lib/vans/public-queries";
@@ -64,9 +64,19 @@ export function PublicStockScreen() {
     <div className="min-h-dvh bg-background">
       <header className="pt-safe sticky top-0 z-30 border-b bg-background/90 backdrop-blur-xl">
         <div className="mx-auto max-w-3xl px-4">
-          <div className="flex h-14 items-baseline gap-2 pt-3">
-            <h1 className="text-[22px] font-extrabold tracking-tight">Nos vans</h1>
-            <span className="text-sm font-semibold tabular-nums text-muted-foreground">{vans.length}</span>
+          <div className="flex h-14 items-center justify-between gap-3">
+            <div className="flex min-w-0 items-baseline gap-2">
+              <h1 className="truncate text-[22px] font-extrabold tracking-tight">Nos vans</h1>
+              <span className="text-sm font-semibold tabular-nums text-muted-foreground">{vans.length}</span>
+            </div>
+            <Link
+              to="/"
+              aria-label="Connexion administrateur avec Google"
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border/70 px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <ShieldCheck className="size-3.5" />
+              Admin
+            </Link>
           </div>
           <div className="relative pb-3">
             <Search className="pointer-events-none absolute left-3.5 top-3 size-[18px] text-muted-foreground" />
