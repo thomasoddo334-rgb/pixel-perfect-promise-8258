@@ -32,3 +32,4 @@ use the editor.
 - Keep photo slot definitions and WOF wording in the pure vehicle model so the sheet and exports stay consistent.
 - Compute completion from required photo slots only; spare slots must not block publication or inflate progress.
 - Keep the business contact sheet on its own gated route, accessible from the stock menu, so contact details do not become vehicle fields.
+- Serve the visitor catalogue (/public, /public/van/$id) outside AppGate through the `get_public_vehicles` database function and the public-photo storage policy, so visitors never read the vehicles table or internal notes directly.
