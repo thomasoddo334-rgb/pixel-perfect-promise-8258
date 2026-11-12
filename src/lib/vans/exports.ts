@@ -1,4 +1,5 @@
 // Pure export builders (CSV for Wix, social post text). File I/O lives in export-files.ts.
+import { buildContactDetails } from "../contact";
 import {
   EQUIPEMENTS,
   PHOTO_COUNT,
@@ -114,6 +115,8 @@ export function buildSocialPost(v: Vehicle): string {
     lines.push("");
     lines.push(v.remarque.trim());
   }
+  lines.push("");
+  lines.push(...buildContactDetails());
   lines.push("");
   const tags = ["#vanlife", "#campervan", "#vanamenage", "#nouvellezelande", "#newzealand", "#vanforsale", "#selfcontained"];
   if (v.marque) tags.push(hashtag(v.marque));
