@@ -112,7 +112,31 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_public_vehicles: {
+        Args: never
+        Returns: {
+          annee: number
+          boite: string
+          carburant: string
+          couchages: number
+          disponibilite: string
+          equipements: string[]
+          id: string
+          kilometrage: number
+          marque: string
+          modele: string
+          motorisation: string
+          photos: Json
+          places: number
+          prix: number
+          publication: string
+          reference: string
+          updated_at: string
+          wof: boolean
+        }[]
+      }
       is_allowed_user: { Args: never; Returns: boolean }
+      is_public_van_photo: { Args: { _name: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
