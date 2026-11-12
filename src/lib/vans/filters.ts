@@ -37,6 +37,14 @@ function norm(s: string) {
     .toLowerCase();
 }
 
+export function isPublicVehicle(v: Vehicle): boolean {
+  return v.publication === "pret" || v.publication === "publie";
+}
+
+export function filterPublicVehicles<T extends Vehicle>(list: T[]): T[] {
+  return list.filter(isPublicVehicle);
+}
+
 export function countExtraFilters(f: StockFilters): number {
   return [f.marque, f.disponibilite, f.anneeMin, f.prixMax].filter((x) => x !== "" && x !== null).length;
 }
