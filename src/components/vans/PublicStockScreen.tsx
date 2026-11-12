@@ -65,7 +65,7 @@ export function PublicStockScreen() {
       <header className="pt-safe sticky top-0 z-30 border-b bg-background/90 backdrop-blur-xl">
         <div className="mx-auto max-w-3xl px-4">
           <div className="flex h-14 items-baseline gap-2 pt-3">
-            <h1 className="text-[22px] font-extrabold tracking-tight">JCC CAMPERVANS</h1>
+            <h1 className="text-[22px] font-extrabold tracking-tight">Nos vans</h1>
             <span className="text-sm font-semibold tabular-nums text-muted-foreground">{vans.length}</span>
           </div>
           <div className="relative pb-3">
