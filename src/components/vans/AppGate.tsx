@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { Loader2, ShieldAlert, WifiOff } from "lucide-react";
-import { useHydrated } from "@tanstack/react-router";
+import { Link, useHydrated } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { lovable } from "@/integrations/lovable";
@@ -31,6 +31,14 @@ function Brand() {
   );
 }
 
+function PublicCatalogueLink() {
+  return (
+    <Button asChild variant="link" className="mt-3 w-full">
+      <Link to="/public">Voir les vans à vendre</Link>
+    </Button>
+  );
+}
+
 function SignInScreen() {
   const [busy, setBusy] = useState(false);
   async function signIn() {
@@ -51,7 +59,8 @@ function SignInScreen() {
         {busy ? <Loader2 className="animate-spin" /> : <GoogleLogo />}
         Sign in with Google
       </Button>
-      <p className="mt-6 text-center text-xs text-muted-foreground">Accès réservé aux deux comptes autorisés.</p>
+      <p className="mt-6 text-center text-xs text-muted-foreground">Accès réservé aux administrateurs.</p>
+      <PublicCatalogueLink />
     </Centered>
   );
 }
@@ -98,6 +107,7 @@ export function AppGate({ children }: { children: ReactNode }) {
             Changer de compte
           </Button>
         </div>
+        <PublicCatalogueLink />
       </Centered>
     );
   }

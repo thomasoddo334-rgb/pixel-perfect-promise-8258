@@ -12,7 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ExportsRouteImport } from './routes/exports'
+import { Route as PublicIndexRouteImport } from './routes/public.index'
 import { Route as VanIdRouteImport } from './routes/van.$id'
+import { Route as PublicVanIdRouteImport } from './routes/public.van.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -29,9 +31,19 @@ const ExportsRoute = ExportsRouteImport.update({
   path: '/exports',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PublicIndexRoute = PublicIndexRouteImport.update({
+  id: '/public/',
+  path: '/public/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VanIdRoute = VanIdRouteImport.update({
   id: '/van/$id',
   path: '/van/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PublicVanIdRoute = PublicVanIdRouteImport.update({
+  id: '/public/van/$id',
+  path: '/public/van/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -40,12 +52,16 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/exports': typeof ExportsRoute
   '/van/$id': typeof VanIdRoute
+  '/public/': typeof PublicIndexRoute
+  '/public/van/$id': typeof PublicVanIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/contact': typeof ContactRoute
   '/exports': typeof ExportsRoute
   '/van/$id': typeof VanIdRoute
+  '/public': typeof PublicIndexRoute
+  '/public/van/$id': typeof PublicVanIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +69,23 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/exports': typeof ExportsRoute
   '/van/$id': typeof VanIdRoute
+  '/public/': typeof PublicIndexRoute
+  '/public/van/$id': typeof PublicVanIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/contact' | '/exports' | '/van/$id'
+  fullPaths:
+    '/' | '/contact' | '/exports' | '/van/$id' | '/public/' | '/public/van/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/contact' | '/exports' | '/van/$id'
-  id: '__root__' | '/' | '/contact' | '/exports' | '/van/$id'
+  to: '/' | '/contact' | '/exports' | '/van/$id' | '/public' | '/public/van/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/contact'
+    | '/exports'
+    | '/van/$id'
+    | '/public/'
+    | '/public/van/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +93,8 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   ExportsRoute: typeof ExportsRoute
   VanIdRoute: typeof VanIdRoute
+  PublicIndexRoute: typeof PublicIndexRoute
+  PublicVanIdRoute: typeof PublicVanIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -92,11 +120,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExportsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/public/': {
+      id: '/public/'
+      path: '/public'
+      fullPath: '/public/'
+      preLoaderRoute: typeof PublicIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/van/$id': {
       id: '/van/$id'
       path: '/van/$id'
       fullPath: '/van/$id'
       preLoaderRoute: typeof VanIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/public/van/$id': {
+      id: '/public/van/$id'
+      path: '/public/van/$id'
+      fullPath: '/public/van/$id'
+      preLoaderRoute: typeof PublicVanIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -107,6 +149,8 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   ExportsRoute: ExportsRoute,
   VanIdRoute: VanIdRoute,
+  PublicIndexRoute: PublicIndexRoute,
+  PublicVanIdRoute: PublicVanIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
