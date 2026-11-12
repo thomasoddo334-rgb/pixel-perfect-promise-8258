@@ -29,16 +29,24 @@ function Centered({ children }: { children: ReactNode }) {
 function Brand() {
   return (
     <div className="mb-10 flex flex-col items-center text-center">
-      <img src={vanIcon} alt="" width={72} height={72} className="mb-5 size-18 rounded-[22px] shadow-card" />
-      <h1 className="text-3xl font-extrabold tracking-tight">Fiches Vans</h1>
-      <p className="mt-2 text-[15px] text-muted-foreground">Préparez vos fiches véhicules avant publication sur le site.</p>
+      <div className="mb-5 rounded-[26px] border border-white/10 bg-white/5 p-3 shadow-[0_18px_40px_-24px_rgba(16,68,62,0.95)] backdrop-blur-sm">
+        <img src={vanIcon} alt="" width={72} height={72} className="size-18 rounded-[20px]" />
+      </div>
+      <h1 className="text-3xl font-black tracking-[-0.06em] text-foreground">Fiches Vans</h1>
+      <p className="mt-2 max-w-xs text-[15px] leading-6 text-muted-foreground">
+        Préparez vos fiches véhicules avant publication sur le site.
+      </p>
     </div>
   );
 }
 
 function VisitorAccess() {
   return (
-    <Button asChild size="xl" className="w-full rounded-2xl border-0 bg-primary text-base font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:translate-y-[-1px] hover:bg-primary/90">
+    <Button
+      asChild
+      size="xl"
+      className="w-full rounded-[20px] border-0 bg-[linear-gradient(135deg,#0f7c80_0%,#1d9a8a_50%,#2b8a73_100%)] text-base font-semibold text-white shadow-[0_20px_40px_-18px_rgba(14,89,80,0.85)] transition-all duration-200 hover:translate-y-[-1px] hover:shadow-[0_24px_42px_-18px_rgba(14,89,80,0.95)]"
+    >
       <Link to="/public">Accéder en tant que visiteur</Link>
     </Button>
   );
@@ -59,17 +67,30 @@ function SignInScreen() {
   }
   return (
     <Centered>
-      <Brand />
-      <div className="space-y-4">
-        <VisitorAccess />
-        <div className="flex justify-end">
-          <Button variant="outline" size="sm" className="rounded-full border-border/60 bg-card/70 px-3 py-2 text-xs shadow-sm backdrop-blur-sm hover:bg-card" onClick={signIn} disabled={busy}>
-            {busy ? <Loader2 className="size-4 animate-spin" /> : <GoogleLogo />}
-            Google
-          </Button>
+      <div className="relative overflow-hidden rounded-[32px] border border-border/70 bg-card/90 p-6 shadow-[0_20px_60px_-28px_rgba(0,0,0,0.4)] backdrop-blur-sm">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(33,128,118,0.22),_transparent_46%),radial-gradient(circle_at_bottom_right,_rgba(243,169,72,0.18),_transparent_34%)]" />
+        <div className="relative">
+          <Brand />
+          <div className="space-y-4">
+            <VisitorAccess />
+            <div className="flex justify-end">
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-full border-border/60 bg-white/80 px-3 py-2 text-[11px] font-medium tracking-[0.02em] text-foreground shadow-sm backdrop-blur-sm hover:bg-white"
+                onClick={signIn}
+                disabled={busy}
+              >
+                {busy ? <Loader2 className="size-4 animate-spin" /> : <GoogleLogo />}
+                Google
+              </Button>
+            </div>
+          </div>
+          <p className="mt-5 text-center text-[11px] uppercase tracking-[0.12em] text-muted-foreground/80">
+            Accès réservé aux administrateurs
+          </p>
         </div>
       </div>
-      <p className="mt-4 text-center text-xs text-muted-foreground">Accès réservé aux administrateurs.</p>
     </Centered>
   );
 }
