@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ChevronDown, Download, LogOut, MoreHorizontal, Plus, Search, SlidersHorizontal, Truck, X, Contact } from "lucide-react";
+import { ChevronDown, Download, LogOut, MoreHorizontal, Plus, Search, SlidersHorizontal, Truck, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -95,11 +95,6 @@ export function StockScreen() {
                   <DropdownMenuItem asChild className="h-11 text-[15px]">
                     <Link to="/exports">
                       <Download className="size-4" /> Exporter
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="h-11 text-[15px]">
-                    <Link to="/contact">
-                      <Contact className="size-4" /> Fiche contact
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
