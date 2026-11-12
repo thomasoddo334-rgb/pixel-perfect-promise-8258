@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AppGate } from "@/components/vans/AppGate";
-import { StockScreen } from "@/components/vans/StockScreen";
+import { PublicStockScreen } from "@/components/vans/PublicStockScreen";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -13,13 +12,5 @@ export const Route = createFileRoute("/")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: Index,
+  component: PublicStockScreen,
 });
-
-function Index() {
-  return (
-    <AppGate>
-      <StockScreen />
-    </AppGate>
-  );
-}
