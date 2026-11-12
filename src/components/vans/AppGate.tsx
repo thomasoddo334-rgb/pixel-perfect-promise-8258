@@ -38,7 +38,7 @@ function Brand() {
 
 function VisitorAccess() {
   return (
-    <Button asChild size="xl" className="w-full rounded-full text-sm">
+    <Button asChild size="xl" className="w-full rounded-2xl border-0 bg-primary text-base font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:translate-y-[-1px] hover:bg-primary/90">
       <Link to="/public">Accéder en tant que visiteur</Link>
     </Button>
   );
@@ -60,15 +60,16 @@ function SignInScreen() {
   return (
     <Centered>
       <Brand />
-      <VisitorAccess />
-      <p className="mt-4 text-center text-xs text-muted-foreground">Consultez les vans à vendre sans vous connecter.</p>
-      <div className="mt-8 flex justify-end">
-        <Button variant="google" size="sm" className="rounded-full text-xs" onClick={signIn} disabled={busy}>
-          {busy ? <Loader2 className="size-4 animate-spin" /> : <GoogleLogo />}
-          Connexion Google
-        </Button>
+      <div className="space-y-4">
+        <VisitorAccess />
+        <div className="flex justify-end">
+          <Button variant="outline" size="sm" className="rounded-full border-border/60 bg-card/70 px-3 py-2 text-xs shadow-sm backdrop-blur-sm hover:bg-card" onClick={signIn} disabled={busy}>
+            {busy ? <Loader2 className="size-4 animate-spin" /> : <GoogleLogo />}
+            Google
+          </Button>
+        </div>
       </div>
-      <p className="mt-2 text-right text-xs text-muted-foreground">Accès réservé aux administrateurs.</p>
+      <p className="mt-4 text-center text-xs text-muted-foreground">Accès réservé aux administrateurs.</p>
     </Centered>
   );
 }
