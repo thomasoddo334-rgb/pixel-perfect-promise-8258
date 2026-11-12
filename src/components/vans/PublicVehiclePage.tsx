@@ -1,6 +1,7 @@
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { ArrowLeft, Check, Truck } from "lucide-react";
+import { ArrowLeft, Check, ChevronLeft, ChevronRight, Expand, Truck, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { WOF_LABEL, formatNumber } from "@/lib/vans/model";
 import { equipmentLabels } from "@/lib/vans/public";
@@ -9,6 +10,7 @@ import { PublicContact } from "./PublicContact";
 
 export function PublicVehiclePage({ id }: { id: string }) {
   const { data: v } = useSuspenseQuery(publicVehicleQuery(id));
+  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
   const title = [v.marque, v.modele].filter((x) => x.trim()).join(" ") || v.reference;
   const specs: [string, string | null][] = [
     ["Année", v.annee ? String(v.annee) : null],
@@ -21,6 +23,17 @@ export function PublicVehiclePage({ id }: { id: string }) {
     ["Disponibilité", v.disponibilite],
   ];
   const equipment = equipmentLabels(v.equipements);
+
+  useEffect(() => {
+    if (selectedPhotoIndex === null) return;
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setSelectedPhotoIndex(null);
+      if (event.key === "ArrowRight") setSelectedPhotoIndex((index) => (index === null ? null : (index + 1) % v.photos.length));
+      if (event.key === "ArrowLeft") setSelectedPhotoIndex((index) => (index === null ? null : (index - 1 + v.photos.length) % v.photos.length));
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [selectedPhotoIndex, v.photos.length]);
 
   return (
     <div className="min-h-dvh bg-background">
@@ -39,14 +52,24 @@ export function PublicVehiclePage({ id }: { id: string }) {
         {v.photos.length > 0 ? (
           <div className="no-scrollbar flex snap-x snap-mandatory gap-2 overflow-x-auto px-4 pt-4">
             {v.photos.map((p, i) => (
-              <img
+              <button
                 key={p.url}
-                src={p.url}
-                alt={`${title} – ${p.label}`}
-                loading={i === 0 ? "eager" : "lazy"}
-                draggable={false}
-                className="aspect-[4/3] w-[88%] shrink-0 snap-center rounded-2xl bg-muted object-cover md:w-[70%]"
-              />
+                type="button"
+                onClick={() => setSelectedPhotoIndex(i)}
+                aria-label={`Afficher en grand la photo ${i + 1} : ${p.label}`}
+                className="group relative aspect-[4/3] w-[88%] shrink-0 snap-center overflow-hidden rounded-2xl bg-muted text-left md:w-[70%]"
+              >
+                <img
+                  src={p.url}
+                  alt={`${title} – ${p.label}`}
+                  loading={i === 0 ? "eager" : "lazy"}
+                  draggable={false}
+                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                />
+                <span className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-black/55 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm">
+                  <Expand className="size-3.5" /> Agrandir
+                </span>
+              </button>
             ))}
           </div>
         ) : (
@@ -103,6 +126,61 @@ export function PublicVehiclePage({ id }: { id: string }) {
           </section>
         </div>
       </main>
+
+      {selectedPhotoIndex !== null && v.photos[selectedPhotoIndex] && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Photo ${selectedPhotoIndex + 1} sur ${v.photos.length} : ${title}`}
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-4 text-white backdrop-blur-sm"
+          onClick={() => setSelectedPhotoIndex(null)}
+        >
+          <button
+            type="button"
+            onClick={() => setSelectedPhotoIndex(null)}
+            aria-label="Fermer la photo"
+            className="absolute right-4 top-4 z-10 flex size-11 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20"
+          >
+            <X className="size-6" />
+          </button>
+          {v.photos.length > 1 && (
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                setSelectedPhotoIndex((selectedPhotoIndex - 1 + v.photos.length) % v.photos.length);
+              }}
+              aria-label="Photo précédente"
+              className="absolute left-3 z-10 flex size-11 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20 sm:left-6"
+            >
+              <ChevronLeft className="size-7" />
+            </button>
+          )}
+          <figure className="flex max-h-full max-w-full flex-col items-center gap-3" onClick={(event) => event.stopPropagation()}>
+            <img
+              src={v.photos[selectedPhotoIndex].url}
+              alt={`${title} – ${v.photos[selectedPhotoIndex].label}`}
+              className="max-h-[82dvh] max-w-[88vw] rounded-lg object-contain"
+            />
+            <figcaption className="text-center text-sm text-white/80">
+              {v.photos[selectedPhotoIndex].label} · {selectedPhotoIndex + 1} / {v.photos.length}
+            </figcaption>
+          </figure>
+          {v.photos.length > 1 && (
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                setSelectedPhotoIndex((selectedPhotoIndex + 1) % v.photos.length);
+              }}
+              aria-label="Photo suivante"
+              className="absolute right-3 z-10 flex size-11 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20 sm:right-6"
+            >
+              <ChevronRight className="size-7" />
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
