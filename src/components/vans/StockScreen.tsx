@@ -118,9 +118,9 @@ export function StockScreen() {
               inputMode="search"
               value={filters.search}
               onChange={(e) => setFilters({ search: e.target.value })}
-              placeholder="Marque, modèle, référence"
+              placeholder="Marque, modèle, référence ou plaque"
               className="h-11 rounded-xl border-transparent bg-muted pl-10 pr-10 shadow-none"
-              aria-label="Rechercher"
+              aria-label="Rechercher par marque, modèle, référence ou plaque"
             />
             {filters.search && (
               <button

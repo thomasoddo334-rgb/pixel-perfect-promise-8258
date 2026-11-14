@@ -42,6 +42,11 @@ export function VanCard({ v }: { v: Vehicle }) {
             {v.prix !== null ? `${formatNumber(v.prix)} $` : ""}
           </p>
         </div>
+        {v.plaque && (
+          <span className="mt-1 inline-flex w-fit items-center rounded-md border-2 border-foreground/70 bg-amber-100 px-2 py-0.5 font-mono text-[13px] font-bold tracking-[0.16em] text-foreground">
+            {v.plaque}
+          </span>
+        )}
         <p className="mt-0.5 truncate text-[13px] text-muted-foreground">
           {[v.reference, ...details].join(" · ")}
         </p>

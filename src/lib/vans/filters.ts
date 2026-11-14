@@ -37,15 +37,24 @@ function norm(s: string) {
     .toLowerCase();
 }
 
+function normPlate(s: string) {
+  return norm(s).replace(/[\s-]/g, "");
+}
+
 export function countExtraFilters(f: StockFilters): number {
   return [f.marque, f.disponibilite, f.anneeMin, f.prixMax].filter((x) => x !== "" && x !== null).length;
 }
 
 export function applyFilters<T extends Vehicle>(list: T[], f: StockFilters, ignoreStatus = false): T[] {
   const q = norm(f.search.trim());
+  const plateQuery = normPlate(f.search.trim());
   return list.filter((v) => {
     if (!ignoreStatus && f.status !== "all" && computeProgress(v).status !== f.status) return false;
-    if (q && !norm(`${v.marque} ${v.modele} ${v.reference}`).includes(q)) return false;
+    if (
+      q &&
+      !norm(`${v.marque} ${v.modele} ${v.reference}`).includes(q) &&
+      !(v.plaque && normPlate(v.plaque).includes(plateQuery))
+    ) return false;
     if (f.marque && norm(v.marque) !== norm(f.marque)) return false;
     if (f.disponibilite && v.disponibilite !== f.disponibilite) return false;
     if (f.anneeMin !== null && (v.annee === null || v.annee < f.anneeMin)) return false;
