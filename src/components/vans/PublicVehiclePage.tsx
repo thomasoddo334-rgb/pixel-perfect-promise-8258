@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { WOF_LABEL, formatNumber } from "@/lib/vans/model";
 import { equipmentLabels } from "@/lib/vans/public";
 import { publicVehicleQuery } from "@/lib/vans/public-queries";
+import { BrandFooter } from "./PublicBrand";
 import { PublicContact } from "./PublicContact";
 
 export function PublicVehiclePage({ id }: { id: string }) {
@@ -36,10 +37,16 @@ export function PublicVehiclePage({ id }: { id: string }) {
   }, [selectedPhotoIndex, v.photos.length]);
 
   return (
-    <div className="min-h-dvh bg-background">
-      <header className="pt-safe sticky top-0 z-30 border-b bg-background/90 backdrop-blur-xl">
+    <div className="brand-public min-h-dvh bg-background">
+      <header className="pt-safe sticky top-0 z-30 bg-brand text-brand-foreground">
         <div className="mx-auto flex h-14 max-w-3xl items-center gap-2 px-2">
-          <Button asChild variant="ghost" size="icon" className="size-10 rounded-full" aria-label="Retour aux vans">
+          <Button
+            asChild
+            variant="ghost"
+            size="icon"
+            className="size-10 rounded-full text-brand-foreground hover:bg-brand-foreground/10 hover:text-brand-foreground"
+            aria-label="Retour aux vans"
+          >
             <Link to="/public">
               <ArrowLeft className="size-5" />
             </Link>
@@ -85,12 +92,14 @@ export function PublicVehiclePage({ id }: { id: string }) {
               <p className="mt-1 text-sm text-muted-foreground">Réf. {v.reference}</p>
             </div>
             {v.prix !== null && (
-              <p className="shrink-0 text-2xl font-extrabold tabular-nums text-primary">{formatNumber(v.prix)} $</p>
+              <p className="shrink-0 rounded-full bg-brand-accent px-3.5 py-1 text-xl font-extrabold tabular-nums text-brand-accent-foreground">
+                {formatNumber(v.prix)} $
+              </p>
             )}
           </div>
 
           {v.wof && (
-            <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-primary-soft px-3.5 py-1.5 text-sm font-semibold text-primary">
+            <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-brand-accent px-3.5 py-1.5 text-sm font-semibold text-brand-accent-foreground">
               <Check className="size-4" /> {WOF_LABEL}
             </p>
           )}
@@ -112,7 +121,7 @@ export function PublicVehiclePage({ id }: { id: string }) {
               <ul className="mt-3 flex flex-wrap gap-2">
                 {equipment.map((e) => (
                   <li key={e} className="inline-flex items-center gap-1.5 rounded-full border bg-card px-3 py-1.5 text-sm font-medium">
-                    <Check className="size-3.5 text-primary" /> {e}
+                    <Check className="size-3.5 text-brand-ink" /> {e}
                   </li>
                 ))}
               </ul>
@@ -124,6 +133,7 @@ export function PublicVehiclePage({ id }: { id: string }) {
             <p className="mb-4 mt-1 text-sm text-muted-foreground">JCC Campervans NZ vous répond rapidement.</p>
             <PublicContact subject={`${title} (${v.reference})`} />
           </section>
+          <BrandFooter />
         </div>
       </main>
 
