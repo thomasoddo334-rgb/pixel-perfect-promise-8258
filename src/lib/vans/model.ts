@@ -65,6 +65,7 @@ export type Vehicle = {
   reference: string;
   marque: string;
   modele: string;
+  plaque: string | null;
   annee: number | null;
   kilometrage: number | null;
   motorisation: string;
@@ -85,6 +86,10 @@ export type Vehicle = {
   updated_by: string | null;
   updated_by_name: string | null;
 };
+
+export function normalizePlaque(value: string): string {
+  return value.replace(/\s+/g, "").slice(0, 6).toUpperCase();
+}
 
 export type StatusKey = "a_renseigner" | "en_cours" | "complete" | "pret" | "publie";
 
@@ -222,6 +227,7 @@ export function newVehicle(params: {
     reference: params.reference,
     marque: "",
     modele: "",
+    plaque: null,
     annee: null,
     kilometrage: null,
     motorisation: "",
@@ -275,3 +281,4 @@ export function orderedPhotoFiles(v: Pick<Vehicle, "reference" | "photos">): { i
 export function photoStoragePath(vehicleId: string, photoId: string): string {
   return `${vehicleId}/${photoId}.jpg`;
 }
+

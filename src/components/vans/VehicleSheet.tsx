@@ -28,6 +28,7 @@ import {
   WOF_LABEL,
   computeProgress,
   formatNumber,
+  normalizePlaque,
   type Vehicle,
 } from "@/lib/vans/model";
 import { deleteVehicle, setPublication, syncNow, updateVehicle, useVans } from "@/lib/vans/store";
@@ -122,7 +123,6 @@ function VehicleForm({ v }: { v: Vehicle }) {
     const next = new Set(eq);
     if (next.has(key)) next.delete(key);
     else next.add(key);
-    // Keep any retired option (e.g. old "chauffage") stored as-is: it is hidden, never deleted.
     const known = new Set<string>(EQUIPEMENTS.map((e) => e.key));
     set({ equipements: [...EQUIPEMENTS.map((e) => e.key).filter((k) => next.has(k)), ...v.equipements.filter((k) => !known.has(k))] });
   };
@@ -139,7 +139,6 @@ function VehicleForm({ v }: { v: Vehicle }) {
       </header>
 
       <main className="pb-safe mx-auto grid max-w-3xl gap-4 px-4 pt-4">
-        {/* Summary + progress */}
         <section className="rounded-2xl bg-card p-4 shadow-card">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
@@ -240,6 +239,19 @@ function VehicleForm({ v }: { v: Vehicle }) {
               onChange={(e) => set({ modele: e.target.value })}
               placeholder="ex. Hiace"
               autoCapitalize="words"
+              autoComplete="off"
+              className={inputClass}
+            />
+          </Field>
+          <Field label="Plaque" htmlFor="plaque">
+            <Input
+              id="plaque"
+              value={v.plaque ?? ""}
+              onChange={(e) => set({ plaque: normalizePlaque(e.target.value) })}
+              placeholder="AB1234"
+              autoCapitalize="characters"
+              spellCheck={false}
+              maxLength={6}
               autoComplete="off"
               className={inputClass}
             />
@@ -440,3 +452,4 @@ function VehicleForm({ v }: { v: Vehicle }) {
     </div>
   );
 }
+

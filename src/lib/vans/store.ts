@@ -308,11 +308,27 @@ function fromRow(row: Record<string, unknown>): LocalVehicle {
   void server_updated_at;
   return {
     ...rest,
+    plaque: typeof rest.plaque === "string" ? rest.plaque : null,
     equipements: Array.isArray(rest.equipements) ? rest.equipements : [],
     photos: normalizePhotos(rest.photos),
     publication: rest.publication === "pret" || rest.publication === "publie" ? rest.publication : null,
     _dirty: 0,
   };
+}
+
+function isMissingPlaqueColumn(error: { code?: string; message?: string } | null): boolean {
+  if (!error?.message) return false;
+  const msg = error.message.toLowerCase();
+  return msg.includes("plaque") && (msg.includes("does not exist") || msg.includes("no such column") || msg.includes("undefined column"));
+}
+
+async function upsertVehicleRows(rows: Record<string, unknown>[]) {
+  let res = await supabase.from("vehicles").upsert(rows as never, { onConflict: "id" });
+  if (res.error && isMissingPlaqueColumn(res.error)) {
+    const withoutPlaque = rows.map(({ plaque: _plaque, ...rest }) => rest);
+    res = await supabase.from("vehicles").upsert(withoutPlaque as never, { onConflict: "id" });
+  }
+  return res;
 }
 
 async function uploadPhotos() {
@@ -358,8 +374,8 @@ async function pushVehicles() {
   const dirty = [...vehicles.values()].filter((v) => v._dirty === 1);
   if (!dirty.length) return;
   const rows = dirty.map(toRow);
-  const { error } = await supabase.from("vehicles").upsert(rows as never, { onConflict: "id" });
-  if (!error) {
+  const batch = await upsertVehicleRows(rows as Record<string, unknown>[]);
+  if (!batch.error) {
     rows.forEach(markClean);
     emit();
     return;
@@ -367,7 +383,7 @@ async function pushVehicles() {
   // Batch failed: retry one by one so a single bad row never blocks the rest.
   let firstError: string | null = null;
   for (const row of rows) {
-    const res = await supabase.from("vehicles").upsert(row as never, { onConflict: "id" });
+    const res = await upsertVehicleRows([row]);
     if (!res.error) {
       markClean(row);
       continue;
@@ -376,6 +392,15 @@ async function pushVehicles() {
       const cur = vehicles.get(row.id);
       if (cur) updateVehicle(row.id, { reference: generateReference([...vehicles.values()].map((v) => v.reference)) });
       continue;
+    }
+    if (isMissingPlaqueColumn(res.error)) {
+      // already retried by helper; if still missing, ignore the field and continue
+      const plain = Object.fromEntries(Object.entries(row).filter(([key]) => key !== "plaque"));
+      const retry = await supabase.from("vehicles").upsert(plain as never, { onConflict: "id" });
+      if (!retry.error) {
+        markClean(row);
+        continue;
+      }
     }
     firstError ??= res.error.message;
   }
@@ -458,3 +483,4 @@ export async function syncNow(): Promise<void> {
 export function photoSlotsFilled(v: Vehicle) {
   return fixedPhotos(v.photos).filter((p) => p.id).length + "/" + PHOTO_COUNT;
 }
+
