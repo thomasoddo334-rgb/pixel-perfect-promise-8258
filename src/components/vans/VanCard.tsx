@@ -12,6 +12,7 @@ export function VanCard({ v }: { v: Vehicle }) {
   const title = [v.marque, v.modele].filter((x) => x.trim()).join(" ") || "Nouveau véhicule";
   const details = [
     v.annee ? String(v.annee) : null,
+    v.plaque ? v.plaque : null,
     v.kilometrage !== null ? `${formatNumber(v.kilometrage)} km` : null,
   ].filter(Boolean);
   let ago = "";
@@ -62,3 +63,4 @@ export function VanCard({ v }: { v: Vehicle }) {
     </Link>
   );
 }
+

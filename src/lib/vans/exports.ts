@@ -19,6 +19,7 @@ export const CSV_COLUMNS = [
   "titre",
   "marque",
   "modele",
+  "plaque",
   "annee",
   "kilometrage",
   "motorisation",
@@ -61,6 +62,7 @@ export function vehicleCsvRow(v: Vehicle): string[] {
     vehicleTitle(v),
     v.marque,
     v.modele,
+    v.plaque,
     v.annee?.toString() ?? "",
     v.kilometrage?.toString() ?? "",
     v.motorisation,
@@ -148,3 +150,4 @@ export function buildSocialPost(v: Vehicle): string {
   lines.push(tags.join(" "));
   return lines.join("\n");
 }
+

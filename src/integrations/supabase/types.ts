@@ -40,6 +40,7 @@ export type Database = {
           kilometrage: number | null
           marque: string
           modele: string
+          plaque: string
           motorisation: string
           photos: Json
           places: number | null
@@ -66,6 +67,7 @@ export type Database = {
           kilometrage?: number | null
           marque?: string
           modele?: string
+          plaque?: string
           motorisation?: string
           photos?: Json
           places?: number | null
@@ -92,6 +94,7 @@ export type Database = {
           kilometrage?: number | null
           marque?: string
           modele?: string
+          plaque?: string
           motorisation?: string
           photos?: Json
           places?: number | null
@@ -125,12 +128,12 @@ export type Database = {
           kilometrage: number
           marque: string
           modele: string
+          plaque: string
           motorisation: string
           photos: Json
           places: number
           prix: number
           publication: string
-          reference: string
           updated_at: string
           wof: boolean
         }[]
@@ -269,3 +272,4 @@ export const Constants = {
     Enums: {},
   },
 } as const
+

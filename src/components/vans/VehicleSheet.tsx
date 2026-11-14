@@ -244,6 +244,16 @@ function VehicleForm({ v }: { v: Vehicle }) {
               className={inputClass}
             />
           </Field>
+          <Field label="Plaque d’immatriculation" htmlFor="plaque">
+            <Input
+              id="plaque"
+              value={v.plaque}
+              onChange={(e) => set({ plaque: e.target.value.toUpperCase() })}
+              placeholder="ex. AB-123-CD"
+              autoComplete="off"
+              className={inputClass}
+            />
+          </Field>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Année" htmlFor="annee" missing={missingField("Année")}>
               <Input
@@ -440,3 +450,4 @@ function VehicleForm({ v }: { v: Vehicle }) {
     </div>
   );
 }
+
