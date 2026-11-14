@@ -44,6 +44,12 @@
   --color-status-ready: var(--status-ready);
   --color-status-published: var(--status-published);
 
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-brand-accent: var(--brand-accent);
+  --color-brand-accent-foreground: var(--brand-accent-foreground);
+  --color-brand-ink: var(--brand-ink);
+
   --color-google-bg: var(--google-bg);
   --color-google-border: var(--google-border);
   --color-google-text: var(--google-text);
@@ -93,6 +99,14 @@
   --status-complete: oklch(0.56 0.16 255);
   --status-ready: oklch(0.6 0.15 150);
   --status-published: oklch(0.54 0.19 300);
+
+  /* JCC Campervans brand, sampled from the logo (green #013c20, yellow #ffd01e). Visitor catalogue only. */
+  --brand: oklch(0.3134 0.0755 155.792);
+  --brand-foreground: oklch(0.985 0.006 150);
+  --brand-accent: oklch(0.8735 0.1738 91.643);
+  --brand-accent-foreground: oklch(0.3134 0.0755 155.792);
+  /* Accent text on the page background: green on light, yellow on dark for contrast. */
+  --brand-ink: oklch(0.3134 0.0755 155.792);
 
   --google-bg: #ffffff;
   --google-border: #747775;
@@ -147,12 +161,21 @@
     --status-ready: oklch(0.72 0.15 150);
     --status-published: oklch(0.7 0.16 300);
 
+    --brand-ink: oklch(0.8735 0.1738 91.643);
+
     --google-bg: #131314;
     --google-border: #8e918f;
     --google-text: #e3e3e3;
 
     --shadow-card: 0 1px 2px oklch(0 0 0 / 0.3), 0 6px 18px -8px oklch(0 0 0 / 0.5);
   }
+}
+
+/* Visitor catalogue: buttons and focus rings take the brand yellow. */
+.brand-public {
+  --primary: var(--brand-accent);
+  --primary-foreground: var(--brand-accent-foreground);
+  --ring: var(--brand-accent);
 }
 
 @layer base {
