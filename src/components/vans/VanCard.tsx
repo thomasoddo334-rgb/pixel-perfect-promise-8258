@@ -12,7 +12,6 @@ export function VanCard({ v }: { v: Vehicle }) {
   const title = [v.marque, v.modele].filter((x) => x.trim()).join(" ") || "Nouveau véhicule";
   const details = [
     v.annee ? String(v.annee) : null,
-    v.plaque ? v.plaque : null,
     v.kilometrage !== null ? `${formatNumber(v.kilometrage)} km` : null,
   ].filter(Boolean);
   let ago = "";
@@ -43,9 +42,17 @@ export function VanCard({ v }: { v: Vehicle }) {
             {v.prix !== null ? `${formatNumber(v.prix)} $` : ""}
           </p>
         </div>
-        <p className="mt-0.5 truncate text-[13px] text-muted-foreground">
-          {[v.reference, ...details].join(" · ")}
-        </p>
+        <div className="mt-1 flex min-w-0 flex-wrap items-center gap-1.5 text-[13px]">
+          <span className="truncate text-muted-foreground">{v.reference}</span>
+          {v.plaque && (
+            <span className="inline-flex max-w-full items-center rounded-md border border-slate-400 bg-slate-100 px-2 py-0.5 font-mono text-xs font-bold tracking-wider text-slate-900 dark:border-slate-500 dark:bg-slate-800 dark:text-slate-50">
+              {v.plaque}
+            </span>
+          )}
+          {details.map((detail) => (
+            <span key={detail} className="text-muted-foreground">· {detail}</span>
+          ))}
+        </div>
         <div className="mt-auto flex items-center gap-2 pt-1.5">
           <StatusPill status={progress.status} />
           <span className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground tabular-nums">
@@ -63,4 +70,3 @@ export function VanCard({ v }: { v: Vehicle }) {
     </Link>
   );
 }
-
