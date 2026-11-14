@@ -5,6 +5,7 @@ returns table (
   reference text,
   marque text,
   modele text,
+  plaque text,
   annee integer,
   kilometrage integer,
   motorisation text,
@@ -25,7 +26,7 @@ stable
 security definer
 set search_path = public
 as $$
-  select v.id, v.reference, v.marque, v.modele, v.annee::integer, v.kilometrage::integer, v.motorisation,
+  select v.id, v.reference, v.marque, v.modele, v.plaque, v.annee::integer, v.kilometrage::integer, v.motorisation,
          v.boite, v.carburant, v.places::integer, v.couchages::integer, v.prix::numeric, v.equipements, v.wof,
          v.disponibilite, v.publication, v.photos, v.updated_at::timestamptz
   from public.vehicles v

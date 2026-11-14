@@ -28,6 +28,7 @@ CREATE TABLE public.vehicles (
   reference text NOT NULL UNIQUE,
   marque text NOT NULL DEFAULT '',
   modele text NOT NULL DEFAULT '',
+  plaque text NOT NULL DEFAULT '',
   annee integer,
   kilometrage integer,
   motorisation text NOT NULL DEFAULT '',

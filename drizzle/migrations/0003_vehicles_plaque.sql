@@ -1,26 +1,2 @@
-CREATE TABLE public.vehicles (
-  id uuid PRIMARY KEY,
-  reference text NOT NULL UNIQUE,
-  marque text NOT NULL DEFAULT '',
-  modele text NOT NULL DEFAULT '',
-  plaque text NOT NULL DEFAULT '',
-  annee integer,
-  kilometrage integer,
-  motorisation text NOT NULL DEFAULT '',
-  boite text,
-  carburant text,
-  places integer,
-  couchages integer,
-  prix integer,
-  equipements text[] NOT NULL DEFAULT '{}',
-  wof boolean NOT NULL DEFAULT false,
-  disponibilite text NOT NULL DEFAULT 'Disponible',
-  remarque text NOT NULL DEFAULT '',
-  publication text,
-  photos jsonb NOT NULL DEFAULT '[]'::jsonb,
-  deleted boolean NOT NULL DEFAULT false,
-  created_at timestamptz NOT NULL DEFAULT now(),
-  updated_at timestamptz NOT NULL DEFAULT now(),
-  updated_by uuid,
-  updated_by_name text
-);
+ALTER TABLE public.vehicles
+  ADD COLUMN IF NOT EXISTS plaque text NOT NULL DEFAULT '';
