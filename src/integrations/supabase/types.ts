@@ -43,6 +43,7 @@ export type Database = {
           motorisation: string
           photos: Json
           places: number | null
+          plaque: string | null
           prix: number | null
           publication: string | null
           reference: string
@@ -69,6 +70,7 @@ export type Database = {
           motorisation?: string
           photos?: Json
           places?: number | null
+          plaque?: string | null
           prix?: number | null
           publication?: string | null
           reference: string
@@ -95,6 +97,7 @@ export type Database = {
           motorisation?: string
           photos?: Json
           places?: number | null
+          plaque?: string | null
           prix?: number | null
           publication?: string | null
           reference?: string
@@ -149,7 +152,7 @@ export type Database = {
 
 type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof DatabaseWithoutInternals, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
@@ -159,7 +162,7 @@ export type Tables<
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+        DatabaseWithoutInternals[DefaultSchemaWithoutInternals["Views"]])
     : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
@@ -172,8 +175,7 @@ export type Tables<
     : never
   : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
         DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+    ? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -260,8 +262,8 @@ export type CompositeTypes<
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+  : PublicCompositeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeNameOrOptions]
     : never
 
 export const Constants = {
