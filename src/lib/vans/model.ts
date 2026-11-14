@@ -65,6 +65,7 @@ export type Vehicle = {
   reference: string;
   marque: string;
   modele: string;
+  plaque: string;
   annee: number | null;
   kilometrage: number | null;
   motorisation: string;
@@ -109,6 +110,7 @@ export const STATUS_ORDER: Record<StatusKey, number> = {
 const REQUIRED_FIELDS: { key: keyof Vehicle; label: string }[] = [
   { key: "marque", label: "Marque" },
   { key: "modele", label: "Modèle" },
+  { key: "plaque", label: "Plaque d’immatriculation" },
   { key: "annee", label: "Année" },
   { key: "kilometrage", label: "Kilométrage" },
   { key: "motorisation", label: "Motorisation" },
@@ -222,6 +224,7 @@ export function newVehicle(params: {
     reference: params.reference,
     marque: "",
     modele: "",
+    plaque: "",
     annee: null,
     kilometrage: null,
     motorisation: "",
@@ -275,3 +278,4 @@ export function orderedPhotoFiles(v: Pick<Vehicle, "reference" | "photos">): { i
 export function photoStoragePath(vehicleId: string, photoId: string): string {
   return `${vehicleId}/${photoId}.jpg`;
 }
+
