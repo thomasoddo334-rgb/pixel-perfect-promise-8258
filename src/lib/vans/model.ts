@@ -23,16 +23,21 @@ export const CARBURANTS = ["Diesel", "Pétrole", "Hybride", "Électrique", "GPL"
 export const PLACES = [2, 3, 4, 5, 6, 7, 8, 9] as const;
 export const COUCHAGES = [1, 2, 3, 4, 5, 6] as const;
 export const DISPONIBILITES = ["Disponible", "Réservé", "Vendu"] as const;
+// "chauffage" was removed: older sheets may still store it; it is ignored everywhere, never deleted.
 export const EQUIPEMENTS = [
-  { key: "cuisine", label: "Cuisine" },
-  { key: "batterie", label: "Batterie" },
-  { key: "chauffage", label: "Chauffage" },
-  { key: "douche", label: "Douche" },
-  { key: "toilettes", label: "Toilettes" },
-  { key: "panneaux_solaires", label: "Panneaux solaires" },
+  { key: "cuisine", label: "Cuisine", en: "Kitchen" },
+  { key: "batterie", label: "Batterie", en: "Leisure battery" },
+  { key: "douche", label: "Douche", en: "Shower" },
+  { key: "toilettes", label: "Toilettes", en: "Toilet" },
+  { key: "panneaux_solaires", label: "Panneaux solaires", en: "Solar panels" },
 ] as const;
+const EQUIPEMENT_KEYS = new Set<string>(EQUIPEMENTS.map((e) => e.key));
+export function knownEquipements(keys: string[]): string[] {
+  return keys.filter((k) => EQUIPEMENT_KEYS.has(k));
+}
 export const REMARQUE_MAX = 400;
 export const WOF_LABEL = "wof and rego avalaible for one year";
+export const WOF_LABEL_EN = "WOF and rego available for one year";
 export const REQUIRED_PHOTO_COUNT = 10;
 
 export const PHOTO_SLOTS = [
@@ -46,18 +51,10 @@ export const PHOTO_SLOTS = [
   { label: "Salle d'eau", slug: "salle-d-eau" },
   { label: "Rangements", slug: "rangements" },
   { label: "Détail", slug: "detail" },
-  { label: "Supplémentaire 1", slug: "supplementaire-1" },
-  { label: "Supplémentaire 2", slug: "supplementaire-2" },
-  { label: "Supplémentaire 3", slug: "supplementaire-3" },
-  { label: "Supplémentaire 4", slug: "supplementaire-4" },
-  { label: "Supplémentaire 5", slug: "supplementaire-5" },
-  { label: "Supplémentaire 6", slug: "supplementaire-6" },
-  { label: "Supplémentaire 7", slug: "supplementaire-7" },
-  { label: "Supplémentaire 8", slug: "supplementaire-8" },
-  { label: "Supplémentaire 9", slug: "supplementaire-9" },
-  { label: "Supplémentaire 10", slug: "supplementaire-10" },
 ] as const;
+// Fixed, required slots. Optional extra photos follow them in the same stored list (index 10+).
 export const PHOTO_COUNT = PHOTO_SLOTS.length;
+export const EXTRA_PHOTO_LABEL = "Photo supplémentaire";
 
 export type Disponibilite = (typeof DISPONIBILITES)[number];
 export type Publication = "pret" | "publie" | null;
@@ -132,12 +129,31 @@ export function emptyPhotos(): PhotoSlot[] {
   return Array.from({ length: PHOTO_COUNT }, () => ({ id: null, na: false }));
 }
 
-export function normalizePhotos(photos: unknown): PhotoSlot[] {
+// The 10 fixed slots, always in order.
+export function fixedPhotos(photos: unknown): PhotoSlot[] {
   const list = Array.isArray(photos) ? photos : [];
   return Array.from({ length: PHOTO_COUNT }, (_, i) => {
     const p = list[i] as Partial<PhotoSlot> | null | undefined;
     return { id: p?.id ?? null, na: i === 0 ? false : Boolean(p?.na) };
   });
+}
+
+// Optional extra photo ids, in display order. Older sheets' spare slots 11-20 land here, so nothing is lost.
+export function extraPhotos(photos: unknown): string[] {
+  const list = Array.isArray(photos) ? photos : [];
+  return list
+    .slice(PHOTO_COUNT)
+    .map((p) => (p as Partial<PhotoSlot> | null | undefined)?.id ?? null)
+    .filter((id): id is string => typeof id === "string" && id.length > 0);
+}
+
+// Stored shape: 10 fixed slots followed by the extra photos.
+export function normalizePhotos(photos: unknown): PhotoSlot[] {
+  return [...fixedPhotos(photos), ...extraPhotos(photos).map((id) => ({ id, na: false }))];
+}
+
+export function withExtraPhotos(photos: unknown, extras: string[]): PhotoSlot[] {
+  return [...fixedPhotos(photos), ...extras.map((id) => ({ id, na: false }))];
 }
 
 export type Progress = {
@@ -151,7 +167,7 @@ export type Progress = {
 };
 
 export function computeProgress(v: Vehicle): Progress {
-  const photos = normalizePhotos(v.photos);
+  const photos = fixedPhotos(v.photos);
   const missingFields = REQUIRED_FIELDS.filter((f) => !isFilled(v[f.key])).map((f) => f.label);
   const missingPhotos = photos
     .slice(0, REQUIRED_PHOTO_COUNT)
@@ -168,7 +184,7 @@ export function computeProgress(v: Vehicle): Progress {
   const anythingEntered =
     fieldsDone > 0 ||
     photosDone > 0 ||
-    v.equipements.length > 0 ||
+    knownEquipements(v.equipements).length > 0 ||
     v.wof ||
     v.remarque.trim().length > 0;
 
@@ -242,6 +258,18 @@ export function photoFileName(reference: string, slotIndex: number): string {
   if (!slot) throw new RangeError("Unknown photo slot");
   const nn = String(slotIndex + 1).padStart(2, "0");
   return `${reference}_${nn}_${slot.slug}.jpg`;
+}
+
+// Extra photos continue the numbering after the fixed slots: REF_11.jpg, REF_12.jpg…
+export function extraPhotoFileName(reference: string, extraIndex: number): string {
+  return `${reference}_${PHOTO_COUNT + extraIndex + 1}.jpg`;
+}
+
+// Every photo of a sheet in export order (fixed slots, then extras) with its file name.
+export function orderedPhotoFiles(v: Pick<Vehicle, "reference" | "photos">): { id: string; name: string }[] {
+  const fixed = fixedPhotos(v.photos).flatMap((p, i) => (p.id ? [{ id: p.id, name: photoFileName(v.reference, i) }] : []));
+  const extras = extraPhotos(v.photos).map((id, i) => ({ id, name: extraPhotoFileName(v.reference, i) }));
+  return [...fixed, ...extras];
 }
 
 export function photoStoragePath(vehicleId: string, photoId: string): string {

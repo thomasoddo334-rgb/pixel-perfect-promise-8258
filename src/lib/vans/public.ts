@@ -1,5 +1,5 @@
 // Public catalogue rules (pure): which vans visitors may see and which fields they get.
-import { EQUIPEMENTS, PHOTO_SLOTS, normalizePhotos, type Publication, type Vehicle } from "./model";
+import { EQUIPEMENTS, EXTRA_PHOTO_LABEL, PHOTO_SLOTS, normalizePhotos, type Publication, type Vehicle } from "./model";
 
 export function isPublicVehicle(v: { publication: Publication | string | null; deleted?: boolean }): boolean {
   if (v.deleted) return false;
@@ -38,7 +38,7 @@ type PublicSource = Omit<Vehicle, "photos" | "publication"> & { photos: unknown;
 export function toPublicVehicle(v: Pick<PublicSource, keyof PublicVehicle>): PublicVehicle | null {
   if (v.publication !== "pret" && v.publication !== "publie") return null;
   const photos = normalizePhotos(v.photos)
-    .map((p, i) => (p.id ? { path: `${v.id}/${p.id}.jpg`, label: PHOTO_SLOTS[i]?.label ?? "Photo" } : null))
+    .map((p, i) => (p.id ? { path: `${v.id}/${p.id}.jpg`, label: PHOTO_SLOTS[i]?.label ?? EXTRA_PHOTO_LABEL } : null))
     .filter((p): p is PublicPhoto => p !== null);
   const known = new Set<string>(EQUIPEMENTS.map((e) => e.key));
   return {

@@ -1,14 +1,14 @@
 import { useRef, useState } from "react";
-import { Camera, Images, Loader2, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Camera, ImagePlus, Images, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { PHOTO_SLOTS, normalizePhotos, type Vehicle } from "@/lib/vans/model";
-import { addPhotos, removePhoto, setPhoto, setPhotoNotConcerned } from "@/lib/vans/store";
+import { PHOTO_COUNT, PHOTO_SLOTS, extraPhotos, fixedPhotos, type Vehicle } from "@/lib/vans/model";
+import { addExtraPhotos, addPhotos, moveExtraPhoto, removeExtraPhoto, removePhoto, setPhoto, setPhotoNotConcerned } from "@/lib/vans/store";
 import { PhotoImage } from "./PhotoImage";
 
 export function PhotoGrid({ v }: { v: Vehicle }) {
-  const photos = normalizePhotos(v.photos);
+  const photos = fixedPhotos(v.photos);
   const singleRef = useRef<HTMLInputElement>(null);
   const multiRef = useRef<HTMLInputElement>(null);
   const targetSlot = useRef(0);
@@ -137,6 +137,87 @@ export function PhotoGrid({ v }: { v: Vehicle }) {
           );
         })}
       </div>
+      <ExtraPhotos v={v} />
+    </div>
+  );
+}
+
+function ExtraPhotos({ v }: { v: Vehicle }) {
+  const extras = extraPhotos(v.photos);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [progress, setProgress] = useState<string | null>(null);
+
+  async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    e.target.value = "";
+    if (!files.length) return;
+    setProgress(`0/${files.length}`);
+    try {
+      const { added, failed } = await addExtraPhotos(v.id, files, (d, t) => setProgress(`${d}/${t}`));
+      if (failed > 0) toast.error(`${failed} photo${failed > 1 ? "s" : ""} n'${failed > 1 ? "ont" : "a"} pas pu être ajoutée${failed > 1 ? "s" : ""}.`);
+      if (added > 0) toast.success(`${added} photo${added > 1 ? "s" : ""} supplémentaire${added > 1 ? "s" : ""} ajoutée${added > 1 ? "s" : ""}`);
+    } finally {
+      setProgress(null);
+    }
+  }
+
+  return (
+    <div className="mt-6 border-t pt-5">
+      <div className="mb-1 flex items-baseline justify-between gap-2">
+        <h3 className="text-[15px] font-bold">Photos supplémentaires</h3>
+        <span className="text-sm font-bold tabular-nums text-muted-foreground">{extras.length}</span>
+      </div>
+      <p className="mb-3 text-[13px] text-muted-foreground">Facultatives : elles ne comptent pas dans l'avancement.</p>
+      <input ref={inputRef} type="file" accept="image/*" multiple className="hidden" onChange={onPick} />
+      <Button variant="soft" size="lg" className="w-full" disabled={progress !== null} onClick={() => inputRef.current?.click()}>
+        {progress !== null ? <Loader2 className="animate-spin" /> : <ImagePlus />}
+        {progress !== null ? `Ajout en cours… ${progress}` : "Ajouter des photos"}
+      </Button>
+      {extras.length > 0 && (
+        <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {extras.map((photoId, i) => {
+            const n = PHOTO_COUNT + i + 1;
+            return (
+              <li key={photoId} className="flex flex-col gap-1.5">
+                <div className="relative aspect-[4/3] overflow-hidden rounded-xl">
+                  <PhotoImage vehicleId={v.id} photoId={photoId} alt={`Photo ${n}`} />
+                  <button
+                    type="button"
+                    onClick={() => void removeExtraPhoto(v.id, photoId)}
+                    className="absolute right-1.5 top-1.5 flex size-8 items-center justify-center rounded-full bg-foreground/70 text-background backdrop-blur"
+                    aria-label={`Retirer la photo ${n}`}
+                  >
+                    <X className="size-4" strokeWidth={2.5} />
+                  </button>
+                  <span className="pointer-events-none absolute bottom-1.5 left-1.5 rounded-md bg-background/85 px-1.5 py-0.5 text-[11.5px] font-semibold text-foreground backdrop-blur">
+                    {n}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-1.5">
+                  <Button
+                    variant="outline"
+                    className="h-9"
+                    disabled={i === 0}
+                    onClick={() => moveExtraPhoto(v.id, photoId, -1)}
+                    aria-label={`Monter la photo ${n}`}
+                  >
+                    <ArrowUp />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="h-9"
+                    disabled={i === extras.length - 1}
+                    onClick={() => moveExtraPhoto(v.id, photoId, 1)}
+                    aria-label={`Descendre la photo ${n}`}
+                  >
+                    <ArrowDown />
+                  </Button>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 }

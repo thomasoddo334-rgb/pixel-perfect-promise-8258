@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Current request: JCC logo on visitor catalogue (header + footer, green/yellow), English social post, remove Chauffage, 10 fixed photos + unlimited extra photos, logo as app icon.
 - [x] Current request: read-only public catalogue (/public) for visitors, no sign-in, no internal notes.
 - [x] Current request: add a contact sheet with direct WhatsApp, phone and email links, then verify it.
 - [x] Current request: replace WOF label and add 10 optional photo slots (20 total), verify tests and sheet.

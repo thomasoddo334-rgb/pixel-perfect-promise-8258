@@ -4,9 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { getDb, getMeta, setMeta, type LocalVehicle } from "./local-db";
 import {
   PHOTO_COUNT,
+  extraPhotos,
+  fixedPhotos,
   generateReference,
   newVehicle,
   normalizePhotos,
+  withExtraPhotos,
   photoStoragePath,
   type Publication,
   type Vehicle,
@@ -186,12 +189,19 @@ async function queueRemoteDeletion(vehicleId: string, photoId: string) {
   }
 }
 
-export async function setPhoto(vehicleId: string, slot: number, file: Blob) {
+// Resizes and stores a photo locally; it is uploaded on the next sync.
+async function storeLocalPhoto(vehicleId: string, file: Blob): Promise<string> {
   const blob = await resizePhoto(file);
   const photoId = crypto.randomUUID();
   const db = await getDb();
   await db.put("photos", { id: photoId, vehicleId, blob, uploaded: 0, createdAt: new Date().toISOString() });
   pendingPhotoIds.add(photoId);
+  return photoId;
+}
+
+export async function setPhoto(vehicleId: string, slot: number, file: Blob) {
+  if (slot < 0 || slot >= PHOTO_COUNT) return;
+  const photoId = await storeLocalPhoto(vehicleId, file);
   const cur = vehicles.get(vehicleId);
   if (!cur) return;
   const photos = normalizePhotos(cur.photos);
@@ -206,8 +216,7 @@ export async function addPhotos(vehicleId: string, files: File[]): Promise<{ add
   for (const file of files) {
     const cur = vehicles.get(vehicleId);
     if (!cur) break;
-    const photos = normalizePhotos(cur.photos);
-    const slot = photos.findIndex((p) => !p.id && !p.na);
+    const slot = fixedPhotos(cur.photos).findIndex((p) => !p.id && !p.na);
     if (slot === -1) break;
     await setPhoto(vehicleId, slot, file);
     added++;
@@ -217,7 +226,7 @@ export async function addPhotos(vehicleId: string, files: File[]): Promise<{ add
 
 export async function removePhoto(vehicleId: string, slot: number) {
   const cur = vehicles.get(vehicleId);
-  if (!cur) return;
+  if (!cur || slot < 0 || slot >= PHOTO_COUNT) return;
   const photos = normalizePhotos(cur.photos);
   const previous = photos[slot]?.id;
   photos[slot] = { id: null, na: false };
@@ -225,8 +234,53 @@ export async function removePhoto(vehicleId: string, slot: number) {
   if (previous) await queueRemoteDeletion(vehicleId, previous);
 }
 
+// ---------- Optional extra photos (unlimited, after the 10 fixed slots) ----------
+
+export async function addExtraPhotos(
+  vehicleId: string,
+  files: File[],
+  onProgress?: (done: number, total: number) => void,
+): Promise<{ added: number; failed: number }> {
+  let added = 0;
+  let failed = 0;
+  for (const file of files) {
+    if (!vehicles.get(vehicleId)) break;
+    try {
+      const photoId = await storeLocalPhoto(vehicleId, file);
+      const cur = vehicles.get(vehicleId);
+      if (!cur) break;
+      updateVehicle(vehicleId, { photos: withExtraPhotos(cur.photos, [...extraPhotos(cur.photos), photoId]) });
+      added++;
+    } catch {
+      failed++;
+    }
+    onProgress?.(added + failed, files.length);
+  }
+  return { added, failed };
+}
+
+export async function removeExtraPhoto(vehicleId: string, photoId: string) {
+  const cur = vehicles.get(vehicleId);
+  if (!cur) return;
+  const extras = extraPhotos(cur.photos);
+  if (!extras.includes(photoId)) return;
+  updateVehicle(vehicleId, { photos: withExtraPhotos(cur.photos, extras.filter((id) => id !== photoId)) });
+  await queueRemoteDeletion(vehicleId, photoId);
+}
+
+export function moveExtraPhoto(vehicleId: string, photoId: string, direction: -1 | 1) {
+  const cur = vehicles.get(vehicleId);
+  if (!cur) return;
+  const extras = extraPhotos(cur.photos);
+  const from = extras.indexOf(photoId);
+  const to = from + direction;
+  if (from === -1 || to < 0 || to >= extras.length) return;
+  [extras[from], extras[to]] = [extras[to]!, extras[from]!];
+  updateVehicle(vehicleId, { photos: withExtraPhotos(cur.photos, extras) });
+}
+
 export function setPhotoNotConcerned(vehicleId: string, slot: number, na: boolean) {
-  if (slot === 0) return;
+  if (slot <= 0 || slot >= PHOTO_COUNT) return;
   const cur = vehicles.get(vehicleId);
   if (!cur) return;
   const photos = normalizePhotos(cur.photos);
@@ -402,5 +456,5 @@ export async function syncNow(): Promise<void> {
 }
 
 export function photoSlotsFilled(v: Vehicle) {
-  return normalizePhotos(v.photos).filter((p) => p.id).length + "/" + PHOTO_COUNT;
+  return fixedPhotos(v.photos).filter((p) => p.id).length + "/" + PHOTO_COUNT;
 }

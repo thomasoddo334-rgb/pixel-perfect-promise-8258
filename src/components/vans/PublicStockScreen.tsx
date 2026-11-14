@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { formatNumber } from "@/lib/vans/model";
 import { publicVehiclesQuery } from "@/lib/vans/public-queries";
 import type { PublicVehicleView } from "@/lib/vans/public.functions";
+import { BrandFooter, BrandLogo } from "./PublicBrand";
 import { PublicContact } from "./PublicContact";
 
 function norm(s: string) {
@@ -36,15 +37,17 @@ function PublicVanCard({ v }: { v: PublicVehicleView }) {
           </div>
         )}
         {v.disponibilite !== "Disponible" && (
-          <span className="absolute left-3 top-3 rounded-full bg-background/90 px-3 py-1 text-xs font-bold">{v.disponibilite}</span>
+          <span className="absolute left-3 top-3 rounded-full bg-brand-accent px-3 py-1 text-xs font-bold text-brand-accent-foreground">{v.disponibilite}</span>
         )}
       </div>
       <div className="p-4">
         <div className="flex items-start justify-between gap-3">
           <p className="text-[17px] font-bold leading-tight">{title}</p>
-          <p className="shrink-0 text-[17px] font-extrabold tabular-nums text-primary">
-            {v.prix !== null ? `${formatNumber(v.prix)} $` : ""}
-          </p>
+          {v.prix !== null && (
+            <p className="shrink-0 rounded-full bg-brand-accent px-3 py-1 text-[15px] font-extrabold tabular-nums text-brand-accent-foreground">
+              {formatNumber(v.prix)} $
+            </p>
+          )}
         </div>
         <p className="mt-1 text-[13.5px] text-muted-foreground">{details.join(" · ")}</p>
       </div>
@@ -61,47 +64,49 @@ export function PublicStockScreen() {
   }, [vans, search]);
 
   return (
-    <div className="min-h-dvh bg-background">
-      <header className="pt-safe sticky top-0 z-30 border-b bg-background/90 backdrop-blur-xl">
-        <div className="mx-auto max-w-3xl px-4">
-          <div className="flex h-14 items-center justify-between gap-3">
-            <div className="flex min-w-0 items-baseline gap-2">
-              <h1 className="truncate text-[22px] font-extrabold tracking-tight">Nos vans</h1>
-              <span className="text-sm font-semibold tabular-nums text-muted-foreground">{vans.length}</span>
-            </div>
-            <Link
-              to="/"
-              aria-label="Connexion administrateur avec Google"
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border/70 px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            >
-              <ShieldCheck className="size-3.5" />
-              Admin
-            </Link>
-          </div>
-          <div className="relative pb-3">
-            <Search className="pointer-events-none absolute left-3.5 top-3 size-[18px] text-muted-foreground" />
-            <Input
-              type="search"
-              inputMode="search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Marque, modèle"
-              className="h-11 rounded-xl border-transparent bg-muted pl-10 pr-10 shadow-none"
-              aria-label="Rechercher"
-            />
-            {search && (
-              <button
-                type="button"
-                onClick={() => setSearch("")}
-                className="absolute right-2 top-1.5 flex size-8 items-center justify-center rounded-full text-muted-foreground"
-                aria-label="Effacer la recherche"
-              >
-                <X className="size-4" />
-              </button>
-            )}
+    <div className="brand-public min-h-dvh bg-background">
+      <header className="pt-safe rounded-b-[28px] bg-brand text-brand-foreground">
+        <div className="relative mx-auto max-w-3xl px-4 pb-6 pt-5 md:pt-7">
+          <Link
+            to="/"
+            aria-label="Connexion administrateur avec Google"
+            className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full border border-brand-foreground/25 px-2.5 py-1.5 text-xs font-medium text-brand-foreground/80 transition-colors hover:bg-brand-foreground/10 hover:text-brand-foreground"
+          >
+            <ShieldCheck className="size-3.5" />
+            Admin
+          </Link>
+          <BrandLogo eager className="mx-auto h-40 w-40 md:h-56 md:w-56" />
+          <div className="mt-2 flex items-center justify-center gap-2">
+            <h1 className="text-[22px] font-extrabold tracking-tight text-brand-foreground md:text-[26px]">Nos vans à vendre</h1>
+            <span className="rounded-full bg-brand-accent px-2.5 py-0.5 text-sm font-bold tabular-nums text-brand-accent-foreground">{vans.length}</span>
           </div>
         </div>
       </header>
+
+      <div className="mx-auto max-w-3xl px-4 pt-4">
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-3.5 top-3 size-[18px] text-muted-foreground" />
+          <Input
+            type="search"
+            inputMode="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Marque, modèle"
+            className="h-11 rounded-xl border-transparent bg-muted pl-10 pr-10 shadow-none"
+            aria-label="Rechercher"
+          />
+          {search && (
+            <button
+              type="button"
+              onClick={() => setSearch("")}
+              className="absolute right-2 top-1.5 flex size-8 items-center justify-center rounded-full text-muted-foreground"
+              aria-label="Effacer la recherche"
+            >
+              <X className="size-4" />
+            </button>
+          )}
+        </div>
+      </div>
 
       <main className="pb-safe mx-auto max-w-3xl px-4 pt-4">
         {list.length === 0 ? (
@@ -125,6 +130,7 @@ export function PublicStockScreen() {
           <h2 className="text-lg font-bold">JCC Campervans NZ</h2>
           <p className="mb-4 mt-1 text-sm text-muted-foreground">Une question sur un van ? Contactez-nous.</p>
           <PublicContact />
+          <BrandFooter />
         </section>
       </main>
     </div>

@@ -122,7 +122,9 @@ function VehicleForm({ v }: { v: Vehicle }) {
     const next = new Set(eq);
     if (next.has(key)) next.delete(key);
     else next.add(key);
-    set({ equipements: EQUIPEMENTS.map((e) => e.key).filter((k) => next.has(k)) });
+    // Keep any retired option (e.g. old "chauffage") stored as-is: it is hidden, never deleted.
+    const known = new Set<string>(EQUIPEMENTS.map((e) => e.key));
+    set({ equipements: [...EQUIPEMENTS.map((e) => e.key).filter((k) => next.has(k)), ...v.equipements.filter((k) => !known.has(k))] });
   };
 
   return (

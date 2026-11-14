@@ -1,6 +1,6 @@
 // Browser-side file generation: downloads, photos ZIP, sharing photos to the iPhone.
 import { zipSync, type Zippable } from "fflate";
-import { normalizePhotos, photoFileName, type Vehicle } from "./model";
+import { orderedPhotoFiles, type Vehicle } from "./model";
 import { getPhotoBlob } from "./photo-cache";
 
 export function downloadBlob(filename: string, blob: Blob) {
@@ -23,16 +23,13 @@ export function todayStamp() {
 export async function collectPhotoFiles(v: Vehicle): Promise<{ files: File[]; missing: number }> {
   const files: File[] = [];
   let missing = 0;
-  const photos = normalizePhotos(v.photos);
-  for (let i = 0; i < photos.length; i++) {
-    const id = photos[i]?.id;
-    if (!id) continue;
+  for (const { id, name } of orderedPhotoFiles(v)) {
     const blob = await getPhotoBlob(v.id, id);
     if (!blob) {
       missing++;
       continue;
     }
-    files.push(new File([blob], photoFileName(v.reference, i), { type: "image/jpeg" }));
+    files.push(new File([blob], name, { type: "image/jpeg" }));
   }
   return { files, missing };
 }
@@ -42,16 +39,13 @@ export async function buildPhotosZip(
   onProgress?: (done: number, total: number) => void,
 ): Promise<{ blob: Blob; count: number; missing: number }> {
   const tree: Zippable = {};
-  const total = vehicles.reduce((n, v) => n + normalizePhotos(v.photos).filter((p) => p.id).length, 0);
+  const total = vehicles.reduce((n, v) => n + orderedPhotoFiles(v).length, 0);
   let done = 0;
   let count = 0;
   let missing = 0;
   for (const v of vehicles) {
     const folder: Record<string, [Uint8Array, { level: 0 }]> = {};
-    const photos = normalizePhotos(v.photos);
-    for (let i = 0; i < photos.length; i++) {
-      const id = photos[i]?.id;
-      if (!id) continue;
+    for (const { id, name } of orderedPhotoFiles(v)) {
       const blob = await getPhotoBlob(v.id, id);
       done++;
       onProgress?.(done, total);
@@ -59,7 +53,7 @@ export async function buildPhotosZip(
         missing++;
         continue;
       }
-      folder[photoFileName(v.reference, i)] = [new Uint8Array(await blob.arrayBuffer()), { level: 0 }];
+      folder[name] = [new Uint8Array(await blob.arrayBuffer()), { level: 0 }];
       count++;
     }
     if (Object.keys(folder).length) tree[v.reference] = folder;
