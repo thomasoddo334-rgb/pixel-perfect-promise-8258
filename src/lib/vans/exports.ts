@@ -4,10 +4,11 @@ import {
   EQUIPEMENTS,
   PHOTO_COUNT,
   STATUS_LABEL,
-  WOF_LABEL,
+  WOF_LABEL_EN,
   computeProgress,
-  formatNumber,
-  normalizePhotos,
+  extraPhotoFileName,
+  extraPhotos,
+  fixedPhotos,
   photoFileName,
   vehicleTitle,
   type Vehicle,
@@ -34,6 +35,7 @@ export const CSV_COLUMNS = [
   "statut",
   "photo_principale",
   ...Array.from({ length: PHOTO_COUNT }, (_, i) => `photo_${i + 1}`),
+  "photos_supplementaires",
 ];
 
 function csvCell(value: string | number | null | undefined): string {
@@ -41,8 +43,13 @@ function csvCell(value: string | number | null | undefined): string {
   return /[",\r\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
+// One entry per fixed slot (empty when no photo).
 export function photoFileNames(v: Vehicle): string[] {
-  return normalizePhotos(v.photos).map((p, i) => (p.id ? photoFileName(v.reference, i) : ""));
+  return fixedPhotos(v.photos).map((p, i) => (p.id ? photoFileName(v.reference, i) : ""));
+}
+
+export function extraPhotoFileNames(v: Vehicle): string[] {
+  return extraPhotos(v.photos).map((_, i) => extraPhotoFileName(v.reference, i));
 }
 
 export function vehicleCsvRow(v: Vehicle): string[] {
@@ -72,6 +79,7 @@ export function vehicleCsvRow(v: Vehicle): string[] {
     STATUS_LABEL[status],
     files.find((f) => f) ?? "",
     ...files,
+    extraPhotoFileNames(v).join(" | "),
   ];
 }
 
@@ -91,26 +99,42 @@ function hashtag(s: string): string {
   );
 }
 
+const GEARBOX_EN: Record<string, string> = { Manuelle: "Manual", Automatique: "Automatic" };
+const FUEL_EN: Record<string, string> = {
+  Diesel: "Diesel",
+  Pétrole: "Petrol",
+  Hybride: "Hybrid",
+  Électrique: "Electric",
+  GPL: "LPG",
+};
+
+function formatNumberEn(n: number): string {
+  return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+// Facebook / Instagram text, entirely in English (the app UI itself stays French).
 export function buildSocialPost(v: Vehicle): string {
   const eq = new Set(v.equipements);
-  const equipements = EQUIPEMENTS.filter((e) => eq.has(e.key)).map((e) => e.label);
+  const equipment = EQUIPEMENTS.filter((e) => eq.has(e.key)).map((e) => e.en);
   const lines: string[] = [];
-  lines.push(`🚐 ${[v.marque, v.modele].filter(Boolean).join(" ") || "Van aménagé"}${v.annee ? ` – ${v.annee}` : ""}`);
+  lines.push(`🚐 ${[v.marque, v.modele].filter(Boolean).join(" ") || "Campervan"} for sale${v.annee ? ` – ${v.annee}` : ""}`);
   lines.push("");
-  if (v.annee) lines.push(`📅 Année : ${v.annee}`);
-  if (v.kilometrage !== null) lines.push(`🛣️ Kilométrage : ${formatNumber(v.kilometrage)} km`);
-  const meca = [v.motorisation, v.boite, v.carburant].filter(Boolean).join(" · ");
-  if (meca) lines.push(`⚙️ ${meca}`);
+  if (v.annee) lines.push(`📅 Year: ${v.annee}`);
+  if (v.kilometrage !== null) lines.push(`🛣️ Mileage: ${formatNumberEn(v.kilometrage)} km`);
+  const gearbox = v.boite ? (GEARBOX_EN[v.boite] ?? v.boite) : "";
+  const fuel = v.carburant ? (FUEL_EN[v.carburant] ?? v.carburant) : "";
+  const meca = [v.motorisation, gearbox, fuel].filter(Boolean).join(" · ");
+  if (meca) lines.push(`⚙️ Engine: ${meca}`);
   const cap = [
-    v.places ? `${v.places} places` : "",
-    v.couchages ? `${v.couchages} couchage${v.couchages > 1 ? "s" : ""}` : "",
+    v.places ? `${v.places} seat${v.places > 1 ? "s" : ""}` : "",
+    v.couchages ? `sleeps ${v.couchages}` : "",
   ]
     .filter(Boolean)
     .join(" · ");
   if (cap) lines.push(`👥 ${cap}`);
-  if (equipements.length) lines.push(`✅ Équipements : ${equipements.join(", ")}`);
-  if (v.wof) lines.push(`🔧 ${WOF_LABEL}`);
-  if (v.prix !== null) lines.push(`💰 Prix : ${formatNumber(v.prix)} $ NZD`);
+  if (equipment.length) lines.push(`✅ Equipment: ${equipment.join(", ")}`);
+  if (v.wof) lines.push(`🔧 ${WOF_LABEL_EN}`);
+  if (v.prix !== null) lines.push(`💰 Price: $${formatNumberEn(v.prix)} NZD`);
   if (v.remarque.trim()) {
     lines.push("");
     lines.push(v.remarque.trim());
@@ -118,7 +142,7 @@ export function buildSocialPost(v: Vehicle): string {
   lines.push("");
   lines.push(...buildContactDetails());
   lines.push("");
-  const tags = ["#vanlife", "#campervan", "#vanamenage", "#nouvellezelande", "#newzealand", "#vanforsale", "#selfcontained"];
+  const tags = ["#vanlife", "#campervan", "#newzealand", "#nzvanlife", "#campervanforsale", "#vanforsale", "#roadtripnz"];
   if (v.marque) tags.push(hashtag(v.marque));
   if (v.modele) tags.push(hashtag(v.modele));
   lines.push(tags.join(" "));
