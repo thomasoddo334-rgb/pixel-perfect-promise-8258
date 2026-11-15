@@ -9,6 +9,10 @@ import {
   generateReference,
   newVehicle,
   normalizePhotos,
+  normalizeVideos,
+  videoExtension,
+  videoFileError,
+  videoStoragePath,
   withExtraPhotos,
   photoStoragePath,
   type Publication,
@@ -17,6 +21,7 @@ import {
 import { resizePhoto } from "./images";
 
 export const PHOTO_BUCKET = "van-photos";
+export const VIDEO_BUCKET = "van-videos";
 
 export type SyncInfo = {
   online: boolean;
@@ -91,7 +96,7 @@ export function initVanStore(): Promise<void> {
   initPromise = (async () => {
     online = navigator.onLine;
     const db = await getDb();
-    for (const v of await db.getAll("vehicles")) vehicles.set(v.id, { ...v, photos: normalizePhotos(v.photos) });
+    for (const v of await db.getAll("vehicles")) vehicles.set(v.id, { ...v, photos: normalizePhotos(v.photos), videos: normalizeVideos(v.videos) });
     for (const key of await db.getAllKeysFromIndex("photos", "by-uploaded", 0)) pendingPhotoIds.add(key);
     lastSyncedAt = (await getMeta<string>("lastSyncedAt")) ?? null;
     loaded = true;
@@ -279,6 +284,63 @@ export function moveExtraPhoto(vehicleId: string, photoId: string, direction: -1
   updateVehicle(vehicleId, { photos: withExtraPhotos(cur.photos, extras) });
 }
 
+// ---------- Optional videos (online only, max 3, never counted in completion) ----------
+
+export const VIDEO_OFFLINE_MESSAGE = "Connexion nécessaire pour ajouter une vidéo";
+
+// Uploads straight to storage (no offline queue) with progress, then records it on the sheet.
+export async function addVideo(vehicleId: string, file: File, onProgress?: (fraction: number) => void): Promise<void> {
+  const cur = vehicles.get(vehicleId);
+  if (!cur) throw new Error("Fiche introuvable.");
+  const invalid = videoFileError(file, normalizeVideos(cur.videos).length);
+  if (invalid) throw new Error(invalid);
+  if (!navigator.onLine) throw new Error(VIDEO_OFFLINE_MESSAGE);
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  if (!token) throw new Error(VIDEO_OFFLINE_MESSAGE);
+
+  const video = { id: crypto.randomUUID(), ext: videoExtension(file) };
+  const base = (import.meta.env.VITE_SUPABASE_URL as string).replace(/\/$/, "");
+  const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
+  await new Promise<void>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `${base}/storage/v1/object/${VIDEO_BUCKET}/${videoStoragePath(vehicleId, video)}`);
+    xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+    xhr.setRequestHeader("apikey", key);
+    xhr.setRequestHeader("x-upsert", "true");
+    xhr.setRequestHeader("Content-Type", file.type || "video/mp4");
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) onProgress?.(e.loaded / e.total);
+    };
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) resolve();
+      else if (xhr.status === 413) reject(new Error("Vidéo trop lourde : 50 Mo maximum."));
+      else reject(new Error("L'envoi de la vidéo a échoué. Réessayez."));
+    };
+    xhr.onerror = () => reject(new Error(VIDEO_OFFLINE_MESSAGE));
+    xhr.send(file);
+  });
+  const latest = vehicles.get(vehicleId);
+  if (!latest) return;
+  updateVehicle(vehicleId, { videos: [...normalizeVideos(latest.videos), video] });
+}
+
+export async function removeVideo(vehicleId: string, videoId: string): Promise<void> {
+  const cur = vehicles.get(vehicleId);
+  if (!cur) return;
+  const list = normalizeVideos(cur.videos);
+  const video = list.find((x) => x.id === videoId);
+  if (!video) return;
+  if (!navigator.onLine) throw new Error("Connexion nécessaire pour supprimer une vidéo");
+  updateVehicle(vehicleId, { videos: list.filter((x) => x.id !== videoId) });
+  await supabase.storage.from(VIDEO_BUCKET).remove([videoStoragePath(vehicleId, video)]);
+}
+
+export async function getVideoUrl(vehicleId: string, video: { id: string; ext: string }): Promise<string | null> {
+  const { data } = await supabase.storage.from(VIDEO_BUCKET).createSignedUrl(videoStoragePath(vehicleId, video), 60 * 60);
+  return data?.signedUrl ?? null;
+}
+
 export function setPhotoNotConcerned(vehicleId: string, slot: number, na: boolean) {
   if (slot <= 0 || slot >= PHOTO_COUNT) return;
   const cur = vehicles.get(vehicleId);
@@ -299,7 +361,7 @@ export function getAllVehicles(): LocalVehicle[] {
 function toRow(v: LocalVehicle) {
   const { _dirty, ...row } = v;
   void _dirty;
-  return { ...row, photos: normalizePhotos(row.photos) };
+  return { ...row, photos: normalizePhotos(row.photos), videos: normalizeVideos(row.videos) };
 }
 
 function fromRow(row: Record<string, unknown>): LocalVehicle {
@@ -310,6 +372,7 @@ function fromRow(row: Record<string, unknown>): LocalVehicle {
     ...rest,
     equipements: Array.isArray(rest.equipements) ? rest.equipements : [],
     photos: normalizePhotos(rest.photos),
+    videos: normalizeVideos(rest.videos),
     publication: rest.publication === "pret" || rest.publication === "publie" ? rest.publication : null,
     _dirty: 0,
   };

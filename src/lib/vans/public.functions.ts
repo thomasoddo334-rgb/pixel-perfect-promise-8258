@@ -6,7 +6,10 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { getPublicVehicles, toPublicVehicle, type PublicVehicle } from "./public";
 
-export type PublicVehicleView = Omit<PublicVehicle, "photos"> & { photos: { url: string; label: string }[] };
+export type PublicVehicleView = Omit<PublicVehicle, "photos" | "videos"> & {
+  photos: { url: string; label: string }[];
+  videos: { url: string }[];
+};
 
 const PHOTO_URL_TTL = 60 * 60 * 6;
 
@@ -36,22 +39,31 @@ async function loadPublic(id?: string): Promise<PublicVehicleView[]> {
     .map((row) => toPublicVehicle(row))
     .filter((v): v is PublicVehicle => v !== null);
 
-  const paths = vans.flatMap((v) => v.photos.map((p) => p.path));
-  const signed = new Map<string, string>();
-  if (paths.length) {
-    const { data: urls } = await sb.storage.from("van-photos").createSignedUrls(paths, PHOTO_URL_TTL);
-    // Signed URLs are built from the server address; browsers must use the public one.
-    const serverBase = process.env["SUPABASE_URL"]!.replace(/\/$/, "");
-    const browserBase = (process.env["VITE_SUPABASE_URL"] ?? (import.meta.env["VITE_SUPABASE_URL"] as string | undefined) ?? serverBase).replace(/\/$/, "");
+  // Signed URLs are built from the server address; browsers must use the public one.
+  const serverBase = process.env["SUPABASE_URL"]!.replace(/\/$/, "");
+  const browserBase = (process.env["VITE_SUPABASE_URL"] ?? (import.meta.env["VITE_SUPABASE_URL"] as string | undefined) ?? serverBase).replace(/\/$/, "");
+  async function sign(bucket: string, paths: string[]): Promise<Map<string, string>> {
+    const out = new Map<string, string>();
+    if (!paths.length) return out;
+    const { data: urls } = await sb.storage.from(bucket).createSignedUrls(paths, PHOTO_URL_TTL);
     for (const u of urls ?? []) {
-      if (u.path && u.signedUrl) signed.set(u.path, u.signedUrl.replace(serverBase, browserBase));
+      if (u.path && u.signedUrl) out.set(u.path, u.signedUrl.replace(serverBase, browserBase));
     }
+    return out;
   }
+  const [signed, signedVideos] = await Promise.all([
+    sign("van-photos", vans.flatMap((v) => v.photos.map((p) => p.path))),
+    sign("van-videos", vans.flatMap((v) => v.videos.map((x) => x.path))),
+  ]);
   return vans.map((v) => ({
     ...v,
     photos: v.photos.flatMap((p) => {
       const url = signed.get(p.path);
       return url ? [{ url, label: p.label }] : [];
+    }),
+    videos: v.videos.flatMap((x) => {
+      const url = signedVideos.get(x.path);
+      return url ? [{ url }] : [];
     }),
   }));
 }
