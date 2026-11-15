@@ -1,5 +1,5 @@
 // Public catalogue rules (pure): which vans visitors may see and which fields they get.
-import { EQUIPEMENTS, EXTRA_PHOTO_LABEL_EN, PHOTO_SLOTS, normalizePhotos, type Publication, type Vehicle } from "./model";
+import { EQUIPEMENTS, EXTRA_PHOTO_LABEL_EN, PHOTO_SLOTS, normalizePhotos, normalizeVideos, videoStoragePath, type Publication, type Vehicle } from "./model";
 
 export function isPublicVehicle(v: { publication: Publication | string | null; deleted?: boolean }): boolean {
   if (v.deleted) return false;
@@ -37,11 +37,12 @@ export type PublicVehicle = {
   disponibilite: string;
   publication: "pret" | "publie";
   photos: PublicPhoto[];
+  videos: { path: string }[];
 };
 
-type PublicSource = Omit<Vehicle, "photos" | "publication"> & { photos: unknown; publication: string | null };
+type PublicSource = Omit<Vehicle, "photos" | "publication" | "videos"> & { photos: unknown; videos?: unknown; publication: string | null };
 
-export function toPublicVehicle(v: Pick<PublicSource, keyof PublicVehicle>): PublicVehicle | null {
+export function toPublicVehicle(v: Pick<PublicSource, Exclude<keyof PublicVehicle, "videos">> & { videos?: unknown }): PublicVehicle | null {
   if (v.publication !== "pret" && v.publication !== "publie") return null;
   const photos = normalizePhotos(v.photos)
     .map((p, i) => (p.id ? { path: `${v.id}/${p.id}.jpg`, label: PHOTO_SLOTS[i]?.en ?? EXTRA_PHOTO_LABEL_EN } : null))
@@ -65,11 +66,12 @@ export function toPublicVehicle(v: Pick<PublicSource, keyof PublicVehicle>): Pub
     disponibilite: v.disponibilite,
     publication: v.publication,
     photos,
+    videos: normalizeVideos(v.videos).map((x) => ({ path: videoStoragePath(v.id, x) })),
   };
 }
 
 export function equipmentLabels(keys: string[]): string[] {
-  return EQUIPEMENTS.filter((e) => keys.includes(e.key)).map((e) => e.label);
+  return EQUIPEMENTS.filter((e) => keys.includes(e.key)).map((e) => e.en);
 }
 
 // ---- Visitor-facing formatting, sorting and filtering (English, NZ conventions) ----

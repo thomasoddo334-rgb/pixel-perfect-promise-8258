@@ -11,7 +11,9 @@ import {
   extraPhotoFileName,
   extraPhotos,
   fixedPhotos,
+  normalizeVideos,
   photoFileName,
+  videoFileName,
   vehicleTitle,
   type Vehicle,
 } from "./model";
@@ -39,6 +41,7 @@ export const CSV_COLUMNS = [
   "photo_principale",
   ...Array.from({ length: PHOTO_COUNT }, (_, i) => `photo_${i + 1}`),
   "photos_supplementaires",
+  "videos",
 ];
 
 function csvCell(value: string | number | null | undefined): string {
@@ -53,6 +56,11 @@ export function photoFileNames(v: Vehicle): string[] {
 
 export function extraPhotoFileNames(v: Vehicle): string[] {
   return extraPhotos(v.photos).map((_, i) => extraPhotoFileName(v.reference, i));
+}
+
+// Videos are listed in the CSV only; they are not part of the photos ZIP.
+export function videoFileNames(v: Vehicle): string[] {
+  return normalizeVideos(v.videos).map((x, i) => videoFileName(v.reference, i, x.ext));
 }
 
 export function vehicleCsvRow(v: Vehicle): string[] {
@@ -84,6 +92,7 @@ export function vehicleCsvRow(v: Vehicle): string[] {
     files.find((f) => f) ?? "",
     ...files,
     extraPhotoFileNames(v).join(" | "),
+    videoFileNames(v).join(" | "),
   ];
 }
 

@@ -71,6 +71,8 @@ export const AVAILABILITY_EN: Record<string, string> = { Disponible: "Available"
 export type Disponibilite = (typeof DISPONIBILITES)[number];
 export type Publication = "pret" | "publie" | null;
 export type PhotoSlot = { id: string | null; na: boolean };
+// Optional videos: stored online only (never queued offline) and never counted in completion.
+export type VideoRef = { id: string; ext: string };
 
 export type Vehicle = {
   id: string;
@@ -92,6 +94,7 @@ export type Vehicle = {
   remarque: string;
   publication: Publication;
   photos: PhotoSlot[];
+  videos: VideoRef[];
   deleted: boolean;
   created_at: string;
   updated_at: string;
@@ -251,6 +254,7 @@ export function newVehicle(params: {
     remarque: "",
     publication: null,
     photos: emptyPhotos(),
+    videos: [],
     deleted: false,
     created_at: params.now,
     updated_at: params.now,
@@ -291,3 +295,47 @@ export function photoStoragePath(vehicleId: string, photoId: string): string {
   return `${vehicleId}/${photoId}.jpg`;
 }
 
+
+// ---- Optional videos ----
+
+export const MAX_VIDEOS = 3;
+export const MAX_VIDEO_BYTES = 50 * 1024 * 1024;
+const VIDEO_EXT_BY_TYPE: Record<string, string> = {
+  "video/mp4": "mp4",
+  "video/quicktime": "mov",
+  "video/webm": "webm",
+  "video/x-m4v": "m4v",
+  "video/3gpp": "3gp",
+};
+
+// Tolerates sheets saved before videos existed (missing or malformed column).
+export function normalizeVideos(videos: unknown): VideoRef[] {
+  if (!Array.isArray(videos)) return [];
+  return videos.flatMap((x) => {
+    const v = x as Partial<VideoRef> | null;
+    return v && typeof v.id === "string" && v.id && typeof v.ext === "string" && /^[a-z0-9]{2,5}$/.test(v.ext) ? [{ id: v.id, ext: v.ext }] : [];
+  });
+}
+
+export function videoExtension(file: { name: string; type: string }): string {
+  const fromName = file.name.split(".").pop()?.toLowerCase() ?? "";
+  if (/^[a-z0-9]{2,5}$/.test(fromName) && fromName !== file.name.toLowerCase()) return fromName;
+  return VIDEO_EXT_BY_TYPE[file.type] ?? "mp4";
+}
+
+// French error for the seller, or null when the file can be added.
+export function videoFileError(file: { type: string; size: number }, currentCount: number): string | null {
+  if (currentCount >= MAX_VIDEOS) return `Maximum ${MAX_VIDEOS} vidéos par fiche.`;
+  if (!file.type.startsWith("video/")) return "Ce fichier n'est pas une vidéo.";
+  if (file.size > MAX_VIDEO_BYTES) return "Vidéo trop lourde : 50 Mo maximum.";
+  if (file.size === 0) return "Cette vidéo est vide.";
+  return null;
+}
+
+export function videoStoragePath(vehicleId: string, video: VideoRef): string {
+  return `${vehicleId}/${video.id}.${video.ext}`;
+}
+
+export function videoFileName(reference: string, index: number, ext: string): string {
+  return `${reference}_video_${index + 1}.${ext}`;
+}
