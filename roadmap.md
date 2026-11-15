@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Current request: apply uploaded ZIP (pixel-perfect-promise-8258-propre.zip) onto the project, keep structure valid.
 - [ ] Current request: JCC logo on visitor catalogue (header + footer, green/yellow), English social post, remove Chauffage, 10 fixed photos + unlimited extra photos, logo as app icon.
 - [x] Current request: read-only public catalogue (/public) for visitors, no sign-in, no internal notes.
 - [x] Current request: add a contact sheet with direct WhatsApp, phone and email links, then verify it.
