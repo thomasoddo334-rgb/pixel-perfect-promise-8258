@@ -52,6 +52,7 @@ export type Database = {
           updated_at: string
           updated_by: string | null
           updated_by_name: string | null
+          videos: Json
           wof: boolean
         }
         Insert: {
@@ -79,6 +80,7 @@ export type Database = {
           updated_at?: string
           updated_by?: string | null
           updated_by_name?: string | null
+          videos?: Json
           wof?: boolean
         }
         Update: {
@@ -106,6 +108,7 @@ export type Database = {
           updated_at?: string
           updated_by?: string | null
           updated_by_name?: string | null
+          videos?: Json
           wof?: boolean
         }
         Relationships: []
@@ -135,11 +138,13 @@ export type Database = {
           publication: string
           reference: string
           updated_at: string
+          videos: Json
           wof: boolean
         }[]
       }
       is_allowed_user: { Args: never; Returns: boolean }
       is_public_van_photo: { Args: { _name: string }; Returns: boolean }
+      is_public_van_video: { Args: { _name: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
