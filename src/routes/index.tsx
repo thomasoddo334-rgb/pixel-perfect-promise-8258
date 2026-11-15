@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppGate } from "@/components/vans/AppGate";
+import { noIndex } from "@/lib/site";
 import { StockScreen } from "@/components/vans/StockScreen";
 
 export const Route = createFileRoute("/")({
@@ -11,6 +12,7 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: "Tous les vans aménagés en préparation, avec leur avancement." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      noIndex,
     ],
   }),
   component: Index,

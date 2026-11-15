@@ -1,14 +1,7 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
 User-agent: *
-Allow: /
+Allow: /public
+Disallow: /exports
+Disallow: /contact
+Disallow: /van/
+
+Sitemap: https://pixel-perfect-promise-8258.lovable.app/sitemap.xml

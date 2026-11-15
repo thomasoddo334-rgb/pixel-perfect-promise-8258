@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppGate } from "@/components/vans/AppGate";
+import { noIndex } from "@/lib/site";
 import { VehicleSheet } from "@/components/vans/VehicleSheet";
 
 export const Route = createFileRoute("/van/$id")({
@@ -11,6 +12,7 @@ export const Route = createFileRoute("/van/$id")({
       { property: "og:description", content: "Saisie de la fiche d'un van aménagé : caractéristiques, équipements et photos." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      noIndex,
     ],
   }),
   component: VanPage,

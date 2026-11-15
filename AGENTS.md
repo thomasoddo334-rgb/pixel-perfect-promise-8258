@@ -34,3 +34,4 @@ use the editor.
 - Scope visitor-catalogue branding with the `brand-public` class and `brand-*` tokens so seller pages keep the app theme.
 - Keep the business contact sheet on its own gated route, accessible from the stock menu, so contact details do not become vehicle fields.
 - Serve the visitor catalogue (/public, /public/van/$id) outside AppGate through the `get_public_vehicles` database function and the public-photo storage policy, so visitors never read the vehicles table or internal notes directly.
+- Visitor catalogue text is English; the seller app stays French. Contact details live only in `src/lib/contact.ts`.

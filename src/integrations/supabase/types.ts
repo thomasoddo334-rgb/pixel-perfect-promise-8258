@@ -40,10 +40,10 @@ export type Database = {
           kilometrage: number | null
           marque: string
           modele: string
+          plaque: string
           motorisation: string
           photos: Json
           places: number | null
-          plaque: string
           prix: number | null
           publication: string | null
           reference: string
@@ -67,10 +67,10 @@ export type Database = {
           kilometrage?: number | null
           marque?: string
           modele?: string
+          plaque?: string
           motorisation?: string
           photos?: Json
           places?: number | null
-          plaque?: string
           prix?: number | null
           publication?: string | null
           reference: string
@@ -94,10 +94,10 @@ export type Database = {
           kilometrage?: number | null
           marque?: string
           modele?: string
+          plaque?: string
           motorisation?: string
           photos?: Json
           places?: number | null
-          plaque?: string
           prix?: number | null
           publication?: string | null
           reference?: string
@@ -128,12 +128,12 @@ export type Database = {
           kilometrage: number
           marque: string
           modele: string
+          plaque: string
           motorisation: string
           photos: Json
           places: number
           prix: number
           publication: string
-          reference: string
           updated_at: string
           wof: boolean
         }[]
@@ -272,3 +272,4 @@ export const Constants = {
     Enums: {},
   },
 } as const
+

@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppGate } from "@/components/vans/AppGate";
+import { noIndex } from "@/lib/site";
 import { ExportsScreen } from "@/components/vans/ExportsScreen";
 
 export const Route = createFileRoute("/exports")({
@@ -11,6 +12,7 @@ export const Route = createFileRoute("/exports")({
       { property: "og:description", content: "Exporter les fiches en CSV pour Wix, les photos en ZIP et une sauvegarde complète." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      noIndex,
     ],
   }),
   component: ExportsPage,
