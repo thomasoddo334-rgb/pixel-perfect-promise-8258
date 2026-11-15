@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, ArrowUpRight, Mail, MessageCircle, Phone } from "lucide-react";
 import { AppGate } from "@/components/vans/AppGate";
 import { Button } from "@/components/ui/button";
+import { CONTACTS, type ContactId } from "@/lib/contact";
+import { noIndex } from "@/lib/site";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -12,16 +14,13 @@ export const Route = createFileRoute("/contact")({
       { property: "og:description", content: "Coordonnées de JCC Campervans NZ : WhatsApp, téléphone et e-mail." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      noIndex,
     ],
   }),
   component: ContactPage,
 });
 
-const contacts = [
-  { label: "WhatsApp", value: "+33682893113", href: "https://wa.me/33682893113", icon: MessageCircle, external: true },
-  { label: "Phone", value: "+64 20 4016 4666", href: "tel:+642040164666", icon: Phone, external: false },
-  { label: "Mail", value: "Jcc.campervansnz@gmail.com", href: "mailto:Jcc.campervansnz@gmail.com", icon: Mail, external: false },
-];
+const ICONS: Record<ContactId, typeof Phone> = { whatsapp: MessageCircle, phone: Phone, email: Mail };
 
 function ContactPage() {
   return (
@@ -38,8 +37,10 @@ function ContactPage() {
         <main className="pb-safe mx-auto max-w-3xl px-5 pt-8">
           <h2 className="text-2xl font-bold">JCC Campervans NZ</h2>
           <address className="mt-6 divide-y border-y not-italic">
-            {contacts.map(({ label, value, href, icon: Icon, external }) => (
-              <Button key={label} asChild variant="ghost" className="h-auto w-full justify-start gap-4 rounded-none px-0 py-5 whitespace-normal">
+            {CONTACTS.map(({ id, fr: label, value, href, external }) => {
+              const Icon = ICONS[id];
+              return (
+              <Button key={id} asChild variant="ghost" className="h-auto w-full justify-start gap-4 rounded-none px-0 py-5 whitespace-normal">
                 <a href={href} target={external ? "_blank" : undefined} rel={external ? "noopener noreferrer" : undefined}>
                   <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary"><Icon className="size-5" /></span>
                   <span className="min-w-0 flex-1">
@@ -49,7 +50,8 @@ function ContactPage() {
                   <ArrowUpRight className="text-muted-foreground" />
                 </a>
               </Button>
-            ))}
+              );
+            })}
           </address>
         </main>
       </div>

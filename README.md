@@ -1,26 +1,26 @@
-# Jcc campervan
+# JCC Campervans – Fiches Vans
 
-Implement exactly the screenshot and nothing else
+Application de préparation des fiches véhicules et catalogue visiteur de **JCC Campervans NZ**.
 
-This project was built with [Lovable](https://lovable.dev).
+- **Espace équipe** (`/`) : stock, fiches véhicules (10 photos fixes + photos supplémentaires, plaque d'immatriculation), suivi des statuts, exports (CSV Wix, ZIP des photos, sauvegarde JSON, texte Facebook/Instagram). Connexion Google réservée à une liste d'adresses autorisées. Fonctionne hors ligne et s'installe sur l'écran d'accueil de l'iPhone.
+- **Catalogue visiteur** (`/public`, `/public/van/:id`) : en anglais, sans connexion, lecture seule. Seuls les vans « Prêt à publier » ou « Publié » apparaissent ; les notes internes ne sont jamais exposées.
 
-**Live app**: https://pixel-perfect-promise-8258.lovable.app
+**Application en ligne** : https://pixel-perfect-promise-8258.lovable.app
 
-## Build with Lovable
+## Technique
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/a93a6c3b-566e-476a-9174-9dcf8519f7d2).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+TanStack Start (React 19) · Tailwind CSS 4 · Supabase (base, stockage photos, authentification) · PWA hors ligne (IndexedDB + service worker).
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
+bun install   # ou npm install
+bun run dev   # serveur local
+bun run test  # tests
+bun run build # build de production
 ```
+
+## Points d'attention
+
+- Coordonnées de contact : `src/lib/contact.ts` (une seule source pour le site, la fiche contact et les posts).
+- Adresse publique du site (aperçus de partage, sitemap) : `src/lib/site.ts` et `public/robots.txt`, `public/sitemap.xml`. À modifier si un nom de domaine personnalisé est connecté.
+- Base de données : le champ `plaque` doit exister dans la table `vehicles` (voir `drizzle/migrations/0003_vehicles_plaque.sql`).
+- Projet synchronisé avec [Lovable](https://lovable.dev) : voir `AGENTS.md` avant de modifier l'historique git ou le schéma.

@@ -36,25 +36,37 @@ export function knownEquipements(keys: string[]): string[] {
   return keys.filter((k) => EQUIPEMENT_KEYS.has(k));
 }
 export const REMARQUE_MAX = 400;
-export const WOF_LABEL = "wof and rego avalaible for one year";
+export const WOF_LABEL = "WOF & rego valid for 1 year";
 export const WOF_LABEL_EN = "WOF and rego available for one year";
 export const REQUIRED_PHOTO_COUNT = 10;
 
 export const PHOTO_SLOTS = [
-  { label: "Avant", slug: "avant" },
-  { label: "Arrière", slug: "arriere" },
-  { label: "Côté", slug: "cote" },
-  { label: "Poste de conduite", slug: "poste-de-conduite" },
-  { label: "Salon", slug: "salon" },
-  { label: "Cuisine", slug: "cuisine" },
-  { label: "Couchage", slug: "couchage" },
-  { label: "Salle d'eau", slug: "salle-d-eau" },
-  { label: "Rangements", slug: "rangements" },
-  { label: "Détail", slug: "detail" },
+  { label: "Avant", en: "Front", slug: "avant" },
+  { label: "Arrière", en: "Rear", slug: "arriere" },
+  { label: "Côté", en: "Side", slug: "cote" },
+  { label: "Poste de conduite", en: "Cab", slug: "poste-de-conduite" },
+  { label: "Salon", en: "Living area", slug: "salon" },
+  { label: "Cuisine", en: "Kitchen", slug: "cuisine" },
+  { label: "Couchage", en: "Bed", slug: "couchage" },
+  { label: "Salle d'eau", en: "Bathroom", slug: "salle-d-eau" },
+  { label: "Rangements", en: "Storage", slug: "rangements" },
+  { label: "Détail", en: "Detail", slug: "detail" },
 ] as const;
 // Fixed, required slots. Optional extra photos follow them in the same stored list (index 10+).
 export const PHOTO_COUNT = PHOTO_SLOTS.length;
 export const EXTRA_PHOTO_LABEL = "Photo supplémentaire";
+export const EXTRA_PHOTO_LABEL_EN = "Extra photo";
+
+// English wording for visitor pages and social posts (the seller app itself stays French).
+export const GEARBOX_EN: Record<string, string> = { Manuelle: "Manual", Automatique: "Automatic" };
+export const FUEL_EN: Record<string, string> = {
+  Diesel: "Diesel",
+  Pétrole: "Petrol",
+  Hybride: "Hybrid",
+  Électrique: "Electric",
+  GPL: "LPG",
+};
+export const AVAILABILITY_EN: Record<string, string> = { Disponible: "Available", Réservé: "Reserved", Vendu: "Sold" };
 
 export type Disponibilite = (typeof DISPONIBILITES)[number];
 export type Publication = "pret" | "publie" | null;

@@ -2,6 +2,8 @@
 import { buildContactDetails } from "../contact";
 import {
   EQUIPEMENTS,
+  FUEL_EN,
+  GEARBOX_EN,
   PHOTO_COUNT,
   STATUS_LABEL,
   WOF_LABEL_EN,
@@ -100,15 +102,6 @@ function hashtag(s: string): string {
       .toLowerCase()
   );
 }
-
-const GEARBOX_EN: Record<string, string> = { Manuelle: "Manual", Automatique: "Automatic" };
-const FUEL_EN: Record<string, string> = {
-  Diesel: "Diesel",
-  Pétrole: "Petrol",
-  Hybride: "Hybrid",
-  Électrique: "Electric",
-  GPL: "LPG",
-};
 
 function formatNumberEn(n: number): string {
   return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ",");

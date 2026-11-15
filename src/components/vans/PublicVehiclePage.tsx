@@ -1,29 +1,43 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { ArrowLeft, Check, ChevronLeft, ChevronRight, Expand, Truck, X } from "lucide-react";
+import { ArrowLeft, Check, ChevronLeft, ChevronRight, Expand, Share2, Truck, X } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { WOF_LABEL, formatNumber } from "@/lib/vans/model";
-import { equipmentLabels } from "@/lib/vans/public";
+import { AVAILABILITY_EN, FUEL_EN, GEARBOX_EN, WOF_LABEL } from "@/lib/vans/model";
+import { equipmentLabels, formatKm, formatNzd } from "@/lib/vans/public";
 import { publicVehicleQuery } from "@/lib/vans/public-queries";
 import { BrandFooter } from "./PublicBrand";
-import { PublicContact } from "./PublicContact";
+import { ContactBar } from "./PublicContact";
 
 export function PublicVehiclePage({ id }: { id: string }) {
   const { data: v } = useSuspenseQuery(publicVehicleQuery(id));
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
   const title = [v.marque, v.modele].filter((x) => x.trim()).join(" ") || v.reference;
   const specs: [string, string | null][] = [
-    ["Année", v.annee ? String(v.annee) : null],
-    ["Kilométrage", v.kilometrage !== null ? `${formatNumber(v.kilometrage)} km` : null],
-    ["Motorisation", v.motorisation || null],
-    ["Boîte", v.boite],
-    ["Carburant", v.carburant],
-    ["Places", v.places ? String(v.places) : null],
-    ["Couchages", v.couchages ? String(v.couchages) : null],
-    ["Disponibilité", v.disponibilite],
+    ["Year", v.annee ? String(v.annee) : null],
+    ["Mileage", v.kilometrage !== null ? formatKm(v.kilometrage) : null],
+    ["Engine", v.motorisation || null],
+    ["Transmission", v.boite ? (GEARBOX_EN[v.boite] ?? v.boite) : null],
+    ["Fuel", v.carburant ? (FUEL_EN[v.carburant] ?? v.carburant) : null],
+    ["Seats", v.places ? String(v.places) : null],
+    ["Sleeps", v.couchages ? String(v.couchages) : null],
+    ["Availability", AVAILABILITY_EN[v.disponibilite] ?? v.disponibilite],
   ];
   const equipment = equipmentLabels(v.equipements);
+
+  async function share() {
+    const url = window.location.href;
+    try {
+      if (navigator.share) await navigator.share({ title, url });
+      else {
+        await navigator.clipboard.writeText(url);
+        toast.success("Link copied");
+      }
+    } catch {
+      /* cancelled by the visitor */
+    }
+  }
 
   useEffect(() => {
     if (selectedPhotoIndex === null) return;
@@ -45,17 +59,27 @@ export function PublicVehiclePage({ id }: { id: string }) {
             variant="ghost"
             size="icon"
             className="size-10 rounded-full text-brand-foreground hover:bg-brand-foreground/10 hover:text-brand-foreground"
-            aria-label="Retour aux vans"
+            aria-label="Back to all vans"
           >
             <Link to="/public">
               <ArrowLeft className="size-5" />
             </Link>
           </Button>
-          <p className="truncate text-[17px] font-bold">{title}</p>
+          <p className="min-w-0 flex-1 truncate text-[17px] font-bold">{title}</p>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => void share()}
+            className="size-10 rounded-full text-brand-foreground hover:bg-brand-foreground/10 hover:text-brand-foreground"
+            aria-label="Share this van"
+          >
+            <Share2 className="size-5" />
+          </Button>
         </div>
       </header>
 
-      <main className="pb-safe mx-auto max-w-3xl pb-10">
+      <main className="mx-auto max-w-3xl pb-32">
         {v.photos.length > 0 ? (
           <div className="no-scrollbar flex snap-x snap-mandatory gap-2 overflow-x-auto px-4 pt-4">
             {v.photos.map((p, i) => (
@@ -63,7 +87,7 @@ export function PublicVehiclePage({ id }: { id: string }) {
                 key={p.url}
                 type="button"
                 onClick={() => setSelectedPhotoIndex(i)}
-                aria-label={`Afficher en grand la photo ${i + 1} : ${p.label}`}
+                aria-label={`View photo ${i + 1} full size: ${p.label}`}
                 className="group relative aspect-[4/3] w-[88%] shrink-0 snap-center overflow-hidden rounded-2xl bg-muted text-left md:w-[70%]"
               >
                 <img
@@ -74,7 +98,7 @@ export function PublicVehiclePage({ id }: { id: string }) {
                   className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
                 />
                 <span className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-black/55 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm">
-                  <Expand className="size-3.5" /> Agrandir
+                  <Expand className="size-3.5" /> Enlarge
                 </span>
               </button>
             ))}
@@ -89,11 +113,11 @@ export function PublicVehiclePage({ id }: { id: string }) {
           <div className="mt-5 flex items-start justify-between gap-3">
             <div>
               <h1 className="text-2xl font-extrabold leading-tight tracking-tight">{title}</h1>
-              <p className="mt-1 text-sm text-muted-foreground">Réf. {v.reference}</p>
+              <p className="mt-1 text-sm text-muted-foreground">Ref. {v.reference}</p>
             </div>
             {v.prix !== null && (
               <p className="shrink-0 rounded-full bg-brand-accent px-3.5 py-1 text-xl font-extrabold tabular-nums text-brand-accent-foreground">
-                {formatNumber(v.prix)} $
+                {formatNzd(v.prix)}
               </p>
             )}
           </div>
@@ -117,7 +141,7 @@ export function PublicVehiclePage({ id }: { id: string }) {
 
           {equipment.length > 0 && (
             <section className="mt-6">
-              <h2 className="text-lg font-bold">Équipements</h2>
+              <h2 className="text-lg font-bold">Equipment</h2>
               <ul className="mt-3 flex flex-wrap gap-2">
                 {equipment.map((e) => (
                   <li key={e} className="inline-flex items-center gap-1.5 rounded-full border bg-card px-3 py-1.5 text-sm font-medium">
@@ -128,27 +152,24 @@ export function PublicVehiclePage({ id }: { id: string }) {
             </section>
           )}
 
-          <section className="mt-8 border-t pt-6">
-            <h2 className="text-lg font-bold">Intéressé par ce van ?</h2>
-            <p className="mb-4 mt-1 text-sm text-muted-foreground">JCC Campervans NZ vous répond rapidement.</p>
-            <PublicContact subject={`${title} (${v.reference})`} />
-          </section>
-          <BrandFooter />
+          <BrandFooter teamLink />
         </div>
       </main>
+
+      <ContactBar subject={`${title} (${v.reference})`} />
 
       {selectedPhotoIndex !== null && v.photos[selectedPhotoIndex] && (
         <div
           role="dialog"
           aria-modal="true"
-          aria-label={`Photo ${selectedPhotoIndex + 1} sur ${v.photos.length} : ${title}`}
+          aria-label={`Photo ${selectedPhotoIndex + 1} of ${v.photos.length}: ${title}`}
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-4 text-white backdrop-blur-sm"
           onClick={() => setSelectedPhotoIndex(null)}
         >
           <button
             type="button"
             onClick={() => setSelectedPhotoIndex(null)}
-            aria-label="Fermer la photo"
+            aria-label="Close photo"
             className="absolute right-4 top-4 z-10 flex size-11 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20"
           >
             <X className="size-6" />
@@ -160,7 +181,7 @@ export function PublicVehiclePage({ id }: { id: string }) {
                 event.stopPropagation();
                 setSelectedPhotoIndex((selectedPhotoIndex - 1 + v.photos.length) % v.photos.length);
               }}
-              aria-label="Photo précédente"
+              aria-label="Previous photo"
               className="absolute left-3 z-10 flex size-11 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20 sm:left-6"
             >
               <ChevronLeft className="size-7" />
@@ -183,7 +204,7 @@ export function PublicVehiclePage({ id }: { id: string }) {
                 event.stopPropagation();
                 setSelectedPhotoIndex((selectedPhotoIndex + 1) % v.photos.length);
               }}
-              aria-label="Photo suivante"
+              aria-label="Next photo"
               className="absolute right-3 z-10 flex size-11 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20 sm:right-6"
             >
               <ChevronRight className="size-7" />
