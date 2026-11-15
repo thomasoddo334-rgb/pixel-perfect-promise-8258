@@ -10,6 +10,7 @@ function complete(): Vehicle {
     ...base(),
     marque: "Toyota",
     modele: "Hiace",
+    plaque: "ABC123",
     annee: 2014,
     kilometrage: 185000,
     motorisation: "3.0 TD",
